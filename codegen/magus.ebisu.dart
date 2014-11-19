@@ -44,8 +44,59 @@ void main() {
       library('schema')
       ..parts = [
         part('sql_type')
+        ..enums = [
+          enum_('sql_base_type')
+          ..libraryScopedValues = true
+          ..values = [
+
+            'boolean',
+
+            'char',
+            'varchar',
+            'text',
+
+            'binary',
+            'varbinary',
+            'blob',
+
+            'int',
+            'smallint',
+            'bigint',
+
+            'decimal',
+            'float',
+
+            'date',
+            'time',
+            'datetime',
+            'timestamp',
+
+          ].map((t) => id(t)).toList(),
+        ]
         ..classes = [
-          class_('sql_type'),
+          class_('sql_type')..isAbstract = true,
+          class_('base_type_mixin')
+          ..implement = [ 'SqlType' ]
+          ..isAbstract = true
+          ..members = [
+            member('base_type')..type = 'SqlBaseType',
+          ],
+          class_('length')..isAbstract = true,
+          class_('length_mixin')..implement = [ 'Length' ]
+          ..members = [
+            member('length')..type = 'int'
+          ],
+          class_('display_length')..isAbstract = true,
+          class_('display_length_mixin')..implement = [ 'DisplayLength' ]
+          ..members = [
+            member('display_length')..type = 'int'
+          ],
+          class_('sql_string')..isAbstract = true..implement = [ 'SqlType', 'Length' ],
+          class_('sql_binary')..isAbstract = true..implement = [ 'SqlType', 'Length' ],
+          class_('sql_int')..isAbstract = true
+          ..implement = [ 'SqlType', 'Length', 'DisplayLength' ],
+          class_('sql_float')..isAbstract = true..implement = [ 'SqlType' ],
+          class_('sql_temporal')..isAbstract = true..implement = [ 'SqlType' ],
         ],
       ]
       ..classes = [
@@ -68,6 +119,8 @@ void main() {
         ..members = [
           member('name'),
           member('type')..type = 'SqlType',
+          member('nullable')..type = 'bool',
+          member('auto_increment')..type = 'bool',
         ],
         class_('constraint')
         ..immutable = true
@@ -87,7 +140,17 @@ void main() {
         'package:magus/schema.dart',
       ]
       ..parts = [
-        part('sql_type'),
+        part('sql_type')
+        ..classes = [
+          class_('mysql_sql_string')
+          ..mixins = [ 'BaseTypeMixin', 'LengthMixin' ]..implement = [ 'SqlString' ],
+          class_('mysql_sql_binary')
+          ..mixins = [ 'BaseTypeMixin', 'LengthMixin' ]..implement = [ 'SqlBinary' ],
+          class_('mysql_sql_int')
+          ..mixins = [ 'BaseTypeMixin', 'LengthMixin', 'DisplayLengthMixin' ]..implement = [ 'SqlInt' ],
+          class_('mysql_sql_float')..mixins = [ 'BaseTypeMixin' ]..implement = [ 'SqlFloat' ],
+          class_('mysql_sql_temporal')..mixins = [ 'BaseTypeMixin' ]..implement = [ 'SqlTemporal' ],
+        ],
         part('schema_reader')
         ..classes = [
           class_('mysql_schema_reader')

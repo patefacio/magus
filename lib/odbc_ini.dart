@@ -8,9 +8,7 @@ import 'package:sqljocky/sqljocky.dart';
 // end <additional imports>
 
 class OdbcIni {
-
   Map<String, OdbcIniEntry> get entries => _entries;
-
   // custom <class OdbcIni>
 
   factory OdbcIni([String fileName]) {
@@ -78,13 +76,11 @@ ${_entries[section]}''').join('\n');
 }
 
 class OdbcIniEntry {
-
   OdbcIniEntry(this._user, this._password, this._database);
 
   String get user => _user;
   String get password => _password;
   String get database => _database;
-
   // custom <class OdbcIniEntry>
   // end <class OdbcIniEntry>
   String _user;
