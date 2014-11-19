@@ -4,6 +4,10 @@ author: Daniel Davidson <dbdavidson@yahoo.com>
 dependencies:
 
 # custom <magus dependencies>
+
+  ini: ">=1.0.0"
+  sqljocky: "any"
+
 # end <magus dependencies>
 
 dev_dependencies:

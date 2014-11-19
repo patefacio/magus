@@ -14,6 +14,10 @@ void main(List<String> args) {
 
   addTask('analyze_lib', createAnalyzerTask(_getLibs));
   //TODO: Figure this out: addTask('docs', createDocGenTask(_getLibs));
+  addTask('analyze_test',
+      createAnalyzerTask([
+
+      ]));
 
 
   runHop(args);

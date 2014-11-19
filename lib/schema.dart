@@ -3,11 +3,13 @@ library magus.schema;
 // custom <additional imports>
 // end <additional imports>
 
-class DbType {
+part 'src/schema/sql_type.dart';
+
+class SchemaReader {
 
 
-  // custom <class DbType>
-  // end <class DbType>
+  // custom <class SchemaReader>
+  // end <class SchemaReader>
 }
 
 class Schema {
@@ -38,7 +40,7 @@ class Column {
   const Column(this.name, this.type);
 
   final String name;
-  final DbType type;
+  final SqlType type;
 
   // custom <class Column>
   // end <class Column>
