@@ -130,6 +130,7 @@ void main() {
         class_('schema_reader')..isAbstract = true,
         class_('schema')
         ..immutable = true
+        ..jsonToString = true
         ..members = [
           member('name'),
           member('tables')..type = 'List<Table>',

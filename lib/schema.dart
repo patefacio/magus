@@ -39,6 +39,37 @@ class Schema {
   final List<Table> tables;
   // custom <class Schema>
   // end <class Schema>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "tables": ebisu_utils.toJson(tables),
+  };
+
+  static Schema fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new Schema._fromJsonMapImpl(json);
+  }
+
+  Schema._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    // tables is List<Table>
+    tables = ebisu_utils
+      .constructListFromJsonData(jsonMap["tables"],
+                                 (data) => Table.fromJson(data));
+
+  Schema._copy(Schema other) :
+    name = other.name,
+    tables = other.tables == null? null :
+      (new List.from(other.tables.map((e) =>
+        e == null? null : e.copy())));
+
 }
 
 class Table {

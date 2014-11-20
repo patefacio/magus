@@ -8,7 +8,7 @@ class MysqlSchemaReader
 
   Future<Schema> readSchema(String schemaName) async {
     final tableCreates = await _readTableCreateStatements(schemaName);
-    return _makeSchema(tableCreates);
+    return _makeSchema(schemaName, tableCreates);
   }
 
   _readTableCreateStatements(String schemaName) async {
@@ -30,7 +30,8 @@ class MysqlSchemaReader
   }
 
   static var _commaNl = new RegExp(r',?\n');
-  static Future<Schema> _makeSchema(Map tableCreates) async {
+  static Future<Schema> _makeSchema(String schemaName, Map tableCreates) async {
+    final tables = [];
     tableCreates.forEach((String tableName, String create) {
       // Output of create table puts one entry (column, primary key, unqique
       // key, constraint, etc per line. Parsing splits by line first
@@ -38,11 +39,12 @@ class MysqlSchemaReader
       final entries = create.split(_commaNl).map((s) => s.trim()).toList();
       assert(entries.first.contains('CREATE TABLE'));
       assert(entries.last.contains('ENGINE'));
+      final columns = [];
       entries.sublist(1, entries.length-1).forEach((String entry) {
 
         if(entry[0] == '`') {
           final column = _makeColumn(entry);
-          print('Made column $column');
+          columns.add(column);
         } else if(entry.contains('PRIMARY KEY')) {
           //print("PKEY $tableName => $entry");
         } else if(entry.contains('UNIQUE KEY')) {
@@ -54,8 +56,10 @@ class MysqlSchemaReader
         }
 
       });
+      assert(columns.length>0);
+      tables.add(new Table(tableName, columns, []));
     });
-    return new Schema('foo',[]);
+    return new Schema(schemaName, tables);
   }
 
   static var _whitespaceRe = new RegExp(r'\s+');
