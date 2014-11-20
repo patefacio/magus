@@ -91,16 +91,46 @@ void main() {
           ..members = [
             member('display_length')..type = 'int'
           ],
-          class_('sql_string')..isAbstract = true..implement = [ 'SqlType', 'Length' ],
-          class_('sql_binary')..isAbstract = true..implement = [ 'SqlType', 'Length' ],
-          class_('sql_int')..isAbstract = true
-          ..implement = [ 'SqlType', 'Length', 'DisplayLength' ],
-          class_('sql_float')..isAbstract = true..implement = [ 'SqlType' ],
-          class_('sql_temporal')..isAbstract = true..implement = [ 'SqlType' ],
+
+          class_('sql_string')
+          ..mixins = [ 'BaseTypeMixin' ]
+          ..members = [
+            member('length')..classInit = 0,
+            member('display_length')..classInit = 0,
+          ],
+
+          class_('sql_int')
+          ..mixins = [ 'BaseTypeMixin' ]
+          ..members = [
+            member('length')..classInit = 0,
+            member('display_length')..classInit = 0,
+          ],
+
+          class_('sql_binary')
+          ..mixins = [ 'BaseTypeMixin' ]
+          ..members = [
+            member('length')..classInit = 0,
+          ],
+
+          class_('sql_float')
+          ..mixins = [ 'BaseTypeMixin' ]
+          ..members = [
+            member('length')..classInit = 0,
+          ],
+
+          class_('sql_temporal')
+          ..mixins = [ 'BaseTypeMixin' ]
+          ..members = [
+          ],
+
+          class_('sql_type_visitor')..isAbstract = true,
+
         ],
       ]
       ..classes = [
-        class_('schema_reader'),
+        class_('engine')..isAbstract = true,
+        class_('schema_writer')..isAbstract = true,
+        class_('schema_reader')..isAbstract = true,
         class_('schema')
         ..immutable = true
         ..members = [
@@ -140,16 +170,23 @@ void main() {
         'package:magus/schema.dart',
       ]
       ..parts = [
-        part('sql_type')
+        part('engine')
         ..classes = [
-          class_('mysql_sql_string')
-          ..mixins = [ 'BaseTypeMixin', 'LengthMixin' ]..implement = [ 'SqlString' ],
-          class_('mysql_sql_binary')
-          ..mixins = [ 'BaseTypeMixin', 'LengthMixin' ]..implement = [ 'SqlBinary' ],
-          class_('mysql_sql_int')
-          ..mixins = [ 'BaseTypeMixin', 'LengthMixin', 'DisplayLengthMixin' ]..implement = [ 'SqlInt' ],
-          class_('mysql_sql_float')..mixins = [ 'BaseTypeMixin' ]..implement = [ 'SqlFloat' ],
-          class_('mysql_sql_temporal')..mixins = [ 'BaseTypeMixin' ]..implement = [ 'SqlTemporal' ],
+          class_('mysql_engine')
+          ..immutable = true
+          ..implement = [ 'Engine' ]
+          ..members = [
+            member('connection_pool')..type = 'ConnectionPool'..access = IA
+          ],
+        ],
+        part('schema_writer')
+        ..classes = [
+          class_('mysql_schema_writer')
+          ..immutable = true
+          ..implement = [ 'SchemaWriter' ]
+          ..members = [
+            member('connection_pool')..type = 'ConnectionPool'..access = IA
+          ],
         ],
         part('schema_reader')
         ..classes = [
@@ -157,7 +194,7 @@ void main() {
           ..immutable = true
           ..implement = [ 'SchemaReader' ]
           ..members = [
-            member('connection_pool')..type = 'ConnectionPool'
+            member('connection_pool')..type = 'ConnectionPool'..access = IA
           ],
         ]
       ],

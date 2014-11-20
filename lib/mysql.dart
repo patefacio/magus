@@ -7,7 +7,8 @@ import 'package:sqljocky/sqljocky.dart';
 // custom <additional imports>
 // end <additional imports>
 
-part 'src/mysql/sql_type.dart';
+part 'src/mysql/engine.dart';
+part 'src/mysql/schema_writer.dart';
 part 'src/mysql/schema_reader.dart';
 
 // custom <library mysql>

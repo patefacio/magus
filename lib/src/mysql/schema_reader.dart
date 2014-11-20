@@ -2,9 +2,8 @@ part of magus.mysql;
 
 class MysqlSchemaReader
   implements SchemaReader {
-  const MysqlSchemaReader(this.connectionPool);
+  const MysqlSchemaReader(this._connectionPool);
 
-  final ConnectionPool connectionPool;
   // custom <class MysqlSchemaReader>
 
   Future<Schema> readSchema(String schemaName) async {
@@ -14,18 +13,18 @@ class MysqlSchemaReader
 
   _readTableCreateStatements(String schemaName) async {
     final tableCreates = {};
-    return connectionPool
+    return _connectionPool
     .query('show tables')
     .then((var tableNames) => tableNames.map((t) => t[0]).toList())
     .then((var tableNames) => tableNames
         .map((var tableName) =>
-            connectionPool
+            _connectionPool
             .query('show create table $tableName')
             .then((_) => _.toList())
             .then((var row) => tableCreates[tableName] = row[0][1])))
     .then((futures) => Future.wait(futures))
     .then((var _) {
-      connectionPool.close();
+      _connectionPool.close();
       return tableCreates;
     });
   }
@@ -73,6 +72,7 @@ class MysqlSchemaReader
   }
 
   // end <class MysqlSchemaReader>
+  final ConnectionPool _connectionPool;
 }
 // custom <part schema_reader>
 // end <part schema_reader>

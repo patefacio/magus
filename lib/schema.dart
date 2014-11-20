@@ -5,8 +5,28 @@ library magus.schema;
 
 part 'src/schema/sql_type.dart';
 
-class SchemaReader {
+abstract class Engine {
+  // custom <class Engine>
+
+  SchemaWriter createSchemaWriter();
+  SchemaReader createSchemaReader();
+
+  // end <class Engine>
+}
+
+abstract class SchemaWriter {
+  // custom <class SchemaWriter>
+
+  writeSchema(Schema schema);
+
+  // end <class SchemaWriter>
+}
+
+abstract class SchemaReader {
   // custom <class SchemaReader>
+
+  Future<Schema> readSchema(String schemaName);
+
   // end <class SchemaReader>
 }
 

@@ -16,24 +16,26 @@ main() {
 
   test('read_schema', () async {
     var cp = OdbcIni.createConnectionPool('code_metrics');
-    var reader = new MysqlSchemaReader(cp);
+    var engine = new MysqlEngine(cp);
+    var reader = engine.createSchemaReader();
     var schema = (await reader.readSchema('code_metrics'));
-print('Schema is $schema');
+
+    print('Schema is $schema');
     print('CP $cp');
 
-    print('mysqlstring ddl is ${new MysqlSqlString(VARCHAR)}');
-    print('mysqlstring ddl is ${new MysqlSqlString(VARCHAR, 5)}');
-    print('mysqlstring ddl is ${new MysqlSqlString(TEXT, 5)}');
-    print('mysqlstring ddl is ${new MysqlSqlString(CHAR, 5)}');
+    print('mysqlstring ddl is ${new SqlString(VARCHAR)}');
+    print('mysqlstring ddl is ${new SqlString(VARCHAR, 5)}');
+    print('mysqlstring ddl is ${new SqlString(TEXT, 5)}');
+    print('mysqlstring ddl is ${new SqlString(CHAR, 5)}');
 
-    print('binary ddl is ${new MysqlSqlBinary(BINARY, 2)}');
+    print('binary ddl is ${new SqlBinary(BINARY, 2)}');
 
-    print('binary ddl is ${new MysqlSqlInt(INT, 6)}');
-    print('binary ddl is ${new MysqlSqlInt(INT, 0, 3)}'); // Medium int
-    print('binary ddl is ${new MysqlSqlInt(BIGINT, 6)}');
-    print('binary ddl is ${new MysqlSqlInt(BIGINT)}');
-    print('binary ddl is ${new MysqlSqlInt(SMALLINT, 2)}');
-    print('binary ddl is ${new MysqlSqlInt(SMALLINT)}');
+    print('binary ddl is ${new SqlInt(INT, 6)}');
+    print('binary ddl is ${new SqlInt(INT, 0, 3)}'); // Medium int
+    print('binary ddl is ${new SqlInt(BIGINT, 6)}');
+    print('binary ddl is ${new SqlInt(BIGINT)}');
+    print('binary ddl is ${new SqlInt(SMALLINT, 2)}');
+    print('binary ddl is ${new SqlInt(SMALLINT)}');
   });
 
 // end <main>
