@@ -8,7 +8,7 @@ class MysqlSchemaReader
 
   Future<Schema> readSchema(String schemaName) async {
     final tableCreates = await _readTableCreateStatements(schemaName);
-    return makeSchema(tableCreates);
+    return _makeSchema(tableCreates);
   }
 
   _readTableCreateStatements(String schemaName) async {
@@ -30,7 +30,7 @@ class MysqlSchemaReader
   }
 
   static var _commaNl = new RegExp(r',?\n');
-  static Future<Schema> makeSchema(Map tableCreates) async {
+  static Future<Schema> _makeSchema(Map tableCreates) async {
     tableCreates.forEach((String tableName, String create) {
       // Output of create table puts one entry (column, primary key, unqique
       // key, constraint, etc per line. Parsing splits by line first
@@ -41,15 +41,16 @@ class MysqlSchemaReader
       entries.sublist(1, entries.length-1).forEach((String entry) {
 
         if(entry[0] == '`') {
-          makeColumn(entry);
+          final column = _makeColumn(entry);
+          print('Made column $column');
         } else if(entry.contains('PRIMARY KEY')) {
-          print("PKEY $tableName => $entry");
+          //print("PKEY $tableName => $entry");
         } else if(entry.contains('UNIQUE KEY')) {
-          print("UNIQUE $tableName => $entry");
+          //print("UNIQUE $tableName => $entry");
         } else if(entry.contains('CONSTRAINT')) {
-          print("CONST $tableName => $entry");
+          //print("CONST $tableName => $entry");
         } else {
-          print("UNKONWN $tableName => $entry");
+          //print("UNKONWN $tableName => $entry");
         }
 
       });
@@ -59,15 +60,105 @@ class MysqlSchemaReader
 
   static var _whitespaceRe = new RegExp(r'\s+');
   static var _idRe = new RegExp(r'`(.+)`');
-  static Column makeColumn(String columnSpec) {
-    columnSpec = columnSpec.replaceFirst('NOT NULL', 'NOT_NULL');
+  static Column _makeColumn(String columnSpec) {
+    columnSpec = columnSpec
+      .replaceFirst('NOT NULL', 'NOT_NULL')
+      .replaceFirst(' unsigned', '_unsigned');
     final entries = columnSpec.split(_whitespaceRe);
     final name = _idRe.firstMatch(entries[0]).group(1);
-    final sqlType = entries[1];
+    final mysqlType = entries[1];
     final rest = entries.sublist(2);
     final nullable = !rest.contains('NOT_NULL');
     final autoIncrement = rest.contains('AUTO_INCREMENT');
-    print("COL ($columnSpec)  => $name, $sqlType, $nullable, $autoIncrement");
+    final sqlType = _makeSqlType(mysqlType);
+    return new Column(name, sqlType, nullable, autoIncrement);
+  }
+
+  static var _intRe = new RegExp(r'^int(?:\((\d+)\))?(_unsigned)?$');
+  static var _qualifiedIntRe = new RegExp(r'^(tiny|small|medium|big)int(?:\((\d+)\))?(_unsigned)?$');
+  static var _varcharRe = new RegExp(r'^(var)?char(?:\((\d+)\))?$');
+  static var _textRe = new RegExp(r'^(tiny|medium|long)?text$');
+  static var _blobRe = new RegExp(r'^(tiny|medium|long)?blob$');
+  static var _floatRe = new RegExp(r'^(float|double)(?:\((\d+)\s*,\s*(\d+)\))?(_unsigned)?$');
+  static var _decimalRe = new RegExp(r'^(decimal|numeric)(?:\((\d+)\s*,\s*(\d+)\))?(_unsigned)?$');
+  static var _temporalRe = new RegExp(r'^(time|date|datetime|timestamp)$');
+
+  static SqlType _makeSqlType(String mysqlType) {
+    var match;
+    if((match = _intRe.firstMatch(mysqlType)) != null) {
+      int display_width = int.parse(match.group(1));
+      bool unsigned = match.group(2) != null;
+      return new SqlInt(4, display_width, unsigned);
+    } else if((match = _qualifiedIntRe.firstMatch(mysqlType)) != null) {
+      String qualifier = match.group(1);
+      int display_width = int.parse(match.group(2));
+      bool unsigned = match.group(3) != null;
+      int length = 4;
+      switch(qualifier) {
+        case 'tiny': length = 1; break;
+        case 'small': length = 2; break;
+        case 'medium': length = 3; break;
+        case 'big': length = 8; break;
+      }
+      return new SqlInt(length, display_width, unsigned);
+    } else if((match = _varcharRe.firstMatch(mysqlType)) != null) {
+      bool isVarying = match.group(1) != null;
+      int length = int.parse(match.group(2));
+      return new SqlString(length, isVarying);
+    } else if((match = _textRe.firstMatch(mysqlType)) != null) {
+      final qualifier = match.group(1);
+      int length = (1<<16) - 1;
+      switch(qualifier) {
+        case 'tiny': length = (1<<8) -1; break;
+        case 'medium': length = (1<<24) -1; break;
+        case 'long': length = (1<<32) -1; break;
+      }
+      return new SqlString(length, true);
+    } else if((match = _blobRe.firstMatch(mysqlType)) != null) {
+      final qualifier = match.group(1);
+      int length = (1<<16) - 1;
+      switch(qualifier) {
+        case 'tiny': length = (1<<8) -1; break;
+        case 'medium': length = (1<<24) -1; break;
+        case 'long': length = (1<<32) -1; break;
+      }
+      return new SqlBinary(length, true);
+    } else if((match = _floatRe.firstMatch(mysqlType)) != null) {
+      final floatOrDouble = match.group(1);
+      final precisionFound = match.group(2);
+      int precision;
+      int scale;
+      if(precisionFound != null) {
+        precision = int.parse(precisionFound);
+        scale = int.parse(match.group(3));
+      }
+
+      bool unsigned = match.group(4) != null;
+      return new SqlFloat(precision, scale, unsigned);
+    } else if((match = _decimalRe.firstMatch(mysqlType)) != null) {
+      final decimalOrNumeric = match.group(1);
+      final precisionFound = match.group(2);
+      int precision;
+      int scale;
+      if(precisionFound != null) {
+        precision = int.parse(precisionFound);
+        scale = int.parse(match.group(3));
+      }
+
+      bool unsigned = match.group(4) != null;
+      return new SqlDecimal(precision, scale, unsigned);
+    } else if((match = _temporalRe.firstMatch(mysqlType)) != null) {
+      var tag = match.group(1);
+      switch(tag) {
+        case "date": return new SqlDate();
+        case "time": return new SqlTime(true);
+        case "datetime": return new SqlTimestamp(true, false);
+        case "timestamp": return new SqlTimestamp(true, true);
+      }
+      throw "Found unsupported temporal type $mysqlType";
+    }
+
+    print("WARNING: add support for $mysqlType");
     return null;
   }
 

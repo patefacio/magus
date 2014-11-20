@@ -45,82 +45,79 @@ void main() {
       ..parts = [
         part('sql_type')
         ..enums = [
-          enum_('sql_base_type')
-          ..libraryScopedValues = true
-          ..values = [
-
-            'boolean',
-
-            'char',
-            'varchar',
-            'text',
-
-            'binary',
-            'varbinary',
-            'blob',
-
-            'int',
-            'smallint',
-            'bigint',
-
-            'decimal',
-            'float',
-
-            'date',
-            'time',
-            'datetime',
-            'timestamp',
-
-          ].map((t) => id(t)).toList(),
         ]
         ..classes = [
           class_('sql_type')..isAbstract = true,
-          class_('base_type_mixin')
+
+          class_('type_extension_mixin')
           ..implement = [ 'SqlType' ]
           ..isAbstract = true
           ..members = [
-            member('base_type')..type = 'SqlBaseType',
-          ],
-          class_('length')..isAbstract = true,
-          class_('length_mixin')..implement = [ 'Length' ]
-          ..members = [
-            member('length')..type = 'int'
-          ],
-          class_('display_length')..isAbstract = true,
-          class_('display_length_mixin')..implement = [ 'DisplayLength' ]
-          ..members = [
-            member('display_length')..type = 'int'
+            member('extension')..type = 'dynamic',
           ],
 
           class_('sql_string')
-          ..mixins = [ 'BaseTypeMixin' ]
+          ..jsonSupport = true
+          ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..classInit = 0,
-            member('display_length')..classInit = 0,
+            member('length')..type = 'int'..isFinal = true..ctors = [''],
+            member('is_varying')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'true',
           ],
 
           class_('sql_int')
-          ..mixins = [ 'BaseTypeMixin' ]
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..classInit = 0,
-            member('display_length')..classInit = 0,
+            member('length')..type = 'int'..isFinal = true..ctors = [''],
+            member('display_length')..type = 'int'..isFinal = true..ctors = [''],
+            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false'
+          ],
+
+          class_('sql_decimal')
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
+          ..members = [
+            member('precision')..type = 'int'..isFinal = true..ctors = [''],
+            member('scale')..type = 'int'..isFinal = true..ctors = [''],
+            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_binary')
-          ..mixins = [ 'BaseTypeMixin' ]
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..classInit = 0,
+            member('length')..type = 'int'..isFinal = true..ctors = [''],
+            member('is_varying')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'true',
           ],
 
           class_('sql_float')
-          ..mixins = [ 'BaseTypeMixin' ]
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..classInit = 0,
+            member('precision')..type = 'int'..isFinal = true..ctors = [''],
+            member('scale')..type = 'int'..isFinal = true..ctors = [''],
+            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
-          class_('sql_temporal')
-          ..mixins = [ 'BaseTypeMixin' ]
+          class_('sql_date')
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
+          ],
+
+          class_('sql_time')
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
+          ..members = [
+            member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
+          ],
+
+          class_('sql_timestamp')
+          ..jsonToString = true
+          ..mixins = [ 'TypeExtensionMixin' ]
+          ..members = [
+            member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
+            member('auto_update')..type = 'bool'..isFinal = true..ctors = [''],
           ],
 
           class_('sql_type_visitor')..isAbstract = true,
@@ -139,12 +136,14 @@ void main() {
         ],
         class_('table')
         ..immutable = true
+        ..jsonToString = true
         ..members = [
           member('name'),
           member('columns')..type = 'List<Column>',
           member('constraints')..type = 'List<Constraint>',
         ],
         class_('column')
+        ..jsonToString = true
         ..immutable = true
         ..members = [
           member('name'),
