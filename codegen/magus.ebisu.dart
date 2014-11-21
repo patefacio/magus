@@ -100,7 +100,6 @@ void main() {
           ],
 
           class_('sql_date')
-          ..jsonToString = true
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
           ],
@@ -135,13 +134,37 @@ void main() {
           member('name'),
           member('tables')..type = 'List<Table>',
         ],
+        class_('primary_key')
+        ..jsonToString = true
+        ..immutable = true
+        ..members = [
+          member('columns')..type = 'List<String>'..classInit = [],
+        ],
+        class_('foreign_key_constraint')
+        ..jsonToString = true
+        ..immutable = true
+        ..members = [
+          member('name'),
+          member('ref_table'),
+          member('columns')..type = 'List<String>'..classInit = [],
+          member('ref_columns')..type = 'List<String>'..classInit = [],
+        ],
+        class_('unique_key_constraint')
+        ..jsonToString = true
+        ..immutable = true
+        ..members = [
+          member('name'),
+          member('columns')..type = 'List<String>'..classInit = [],
+        ],
         class_('table')
         ..immutable = true
         ..jsonToString = true
         ..members = [
           member('name'),
           member('columns')..type = 'List<Column>',
-          member('constraints')..type = 'List<Constraint>',
+          member('primary_key')..type = 'PrimaryKey',
+          member('foreign_keys')..type = 'List<ForeignKeyConstraint>',
+          member('unique_keys')..type = 'List<UniqueKeyConstraint>',
         ],
         class_('column')
         ..jsonToString = true
@@ -152,15 +175,6 @@ void main() {
           member('nullable')..type = 'bool',
           member('auto_increment')..type = 'bool',
         ],
-        class_('constraint')
-        ..immutable = true
-        ..members = [
-          member('name')
-        ],
-        class_('foreign_key_constraint')
-        ..extend = 'Constraint',
-        class_('unique_constraint')
-        ..extend = 'Constraint',
       ],
       library('mysql')
       ..imports = [

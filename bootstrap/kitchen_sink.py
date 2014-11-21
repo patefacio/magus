@@ -82,8 +82,18 @@ def main():
                        Column('pref_name', String(40), nullable=False),
                        Column('pref_value', String(100)))
 
-    user_prefs.drop(engine, checkfirst=True)
-    user.drop(engine, checkfirst=True)
+    multi_key = Table('multi_key', metadata,
+                       Column('id_1', Integer, primary_key=True),
+                       Column('id_2', Integer, primary_key=True))
+
+    multi_fkey = Table('multi_fkey', metadata,
+                       Column('id', Integer, primary_key=True),
+                       Column('multi_key_id_1', Integer),
+                       Column('multi_key_id_2', Integer),
+                       ForeignKeyConstraint(['multi_key_id_1', 'multi_key_id_2'], ['multi_key.id_1', 'multi_key.id_2']))
+
+    for t in [ user_prefs, multi_fkey, multi_key, user ]:
+        t.drop(engine, checkfirst=True)
 
     metadata.create_all(engine)
 

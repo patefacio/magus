@@ -35,7 +35,9 @@ class MysqlSchemaReader
     tableCreates.forEach((String tableName, String create) {
       // Output of create table puts one entry (column, primary key, unqique
       // key, constraint, etc per line. Parsing splits by line first
-      print(create);
+      PrimaryKey primaryKey;
+      final uniqueKeyConstraints = [];
+      final foreignKeyConstraints = [];
       final entries = create.split(_commaNl).map((s) => s.trim()).toList();
       assert(entries.first.contains('CREATE TABLE'));
       assert(entries.last.contains('ENGINE'));
@@ -45,19 +47,19 @@ class MysqlSchemaReader
         if(entry[0] == '`') {
           final column = _makeColumn(entry);
           columns.add(column);
+        } else if(entry.contains('FOREIGN KEY')) {
+          foreignKeyConstraints.add(_makeForeignKeyConstraint(entry));
         } else if(entry.contains('PRIMARY KEY')) {
-          //print("PKEY $tableName => $entry");
+          primaryKey = _makePrimaryKey(entry);
         } else if(entry.contains('UNIQUE KEY')) {
-          //print("UNIQUE $tableName => $entry");
-        } else if(entry.contains('CONSTRAINT')) {
-          //print("CONST $tableName => $entry");
+          uniqueKeyConstraints.add(_makeUniqueKeyConstraint(entry));
         } else {
           //print("UNKONWN $tableName => $entry");
         }
 
       });
       assert(columns.length>0);
-      tables.add(new Table(tableName, columns, []));
+      tables.add(new Table(tableName, columns, primaryKey, foreignKeyConstraints, uniqueKeyConstraints));
     });
     return new Schema(schemaName, tables);
   }
@@ -165,6 +167,43 @@ class MysqlSchemaReader
     print("WARNING: add support for $mysqlType");
     return null;
   }
+
+  static var _delimRe = new RegExp(',\s*');
+  static var _pullIdRe = new RegExp(r"^\s*[`']?(\w+)[`']?\s*$");
+  static String _pullId(String s) => _pullIdRe.firstMatch(s).group(1);
+  static var _fkeyRe = new RegExp(r"CONSTRAINT (.+) FOREIGN KEY \(([^)]+)\) REFERENCES (.+) \(([^)]+)\)");
+
+  static ForeignKeyConstraint _makeForeignKeyConstraint(String keyText) {
+    var match = _fkeyRe.firstMatch(keyText);
+    assert(match != null);
+    final name = match.group(1);
+    final colsTxt = match.group(2);
+    final refTable = match.group(3);
+    final refColsTxt = match.group(4);
+    return new ForeignKeyConstraint(name,
+        refTable,
+        colsTxt.split(_delimRe).map((id) => _pullId(id)).toList(),
+        refColsTxt.split(_delimRe).map((id) => _pullId(id)).toList());
+  }
+
+  static var _uniqueKeyRe = new RegExp(r"UNIQUE KEY (.+) \(([^)]+)\)");
+  static UniqueKeyConstraint _makeUniqueKeyConstraint(String keyText) {
+    var match = _uniqueKeyRe.firstMatch(keyText);
+    assert(match != null);
+    final name = match.group(1);
+    final colsTxt = match.group(2);
+    return new UniqueKeyConstraint(name,
+        colsTxt.split(_delimRe).map((id) => _pullId(id)).toList());
+  }
+
+  static var _primaryKeyRe = new RegExp(r"PRIMARY KEY \(([^)]+)\)");
+  static PrimaryKey _makePrimaryKey(String keyText) {
+    var match = _primaryKeyRe.firstMatch(keyText);
+    assert(match != null);
+    final colTerms = match.group(1).split(_delimRe);
+    return new PrimaryKey(colTerms.map((id) => _pullId(id)).toList());
+  }
+
 
   // end <class MysqlSchemaReader>
   final ConnectionPool _connectionPool;

@@ -72,12 +72,137 @@ class Schema {
 
 }
 
+class PrimaryKey {
+  const PrimaryKey(this.columns);
+
+  final List<String> columns;
+  // custom <class PrimaryKey>
+  // end <class PrimaryKey>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "columns": ebisu_utils.toJson(columns),
+  };
+
+  static PrimaryKey fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new PrimaryKey._fromJsonMapImpl(json);
+  }
+
+  PrimaryKey._fromJsonMapImpl(Map jsonMap) :
+    // columns is List<String>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => data);
+
+  PrimaryKey._copy(PrimaryKey other) :
+    columns = other.columns == null? null: new List.from(other.columns);
+
+}
+
+class ForeignKeyConstraint {
+  const ForeignKeyConstraint(this.name, this.refTable, this.columns,
+    this.refColumns);
+
+  final String name;
+  final String refTable;
+  final List<String> columns;
+  final List<String> refColumns;
+  // custom <class ForeignKeyConstraint>
+  // end <class ForeignKeyConstraint>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "refTable": ebisu_utils.toJson(refTable),
+      "columns": ebisu_utils.toJson(columns),
+      "refColumns": ebisu_utils.toJson(refColumns),
+  };
+
+  static ForeignKeyConstraint fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new ForeignKeyConstraint._fromJsonMapImpl(json);
+  }
+
+  ForeignKeyConstraint._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    refTable = jsonMap["refTable"],
+    // columns is List<String>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => data),
+    // refColumns is List<String>
+    refColumns = ebisu_utils
+      .constructListFromJsonData(jsonMap["refColumns"],
+                                 (data) => data);
+
+  ForeignKeyConstraint._copy(ForeignKeyConstraint other) :
+    name = other.name,
+    refTable = other.refTable,
+    columns = other.columns == null? null: new List.from(other.columns),
+    refColumns = other.refColumns == null? null: new List.from(other.refColumns);
+
+}
+
+class UniqueKeyConstraint {
+  const UniqueKeyConstraint(this.name, this.columns);
+
+  final String name;
+  final List<String> columns;
+  // custom <class UniqueKeyConstraint>
+  // end <class UniqueKeyConstraint>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "columns": ebisu_utils.toJson(columns),
+  };
+
+  static UniqueKeyConstraint fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new UniqueKeyConstraint._fromJsonMapImpl(json);
+  }
+
+  UniqueKeyConstraint._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    // columns is List<String>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => data);
+
+  UniqueKeyConstraint._copy(UniqueKeyConstraint other) :
+    name = other.name,
+    columns = other.columns == null? null: new List.from(other.columns);
+
+}
+
 class Table {
-  const Table(this.name, this.columns, this.constraints);
+  const Table(this.name, this.columns, this.primaryKey, this.foreignKeys,
+    this.uniqueKeys);
 
   final String name;
   final List<Column> columns;
-  final List<Constraint> constraints;
+  final PrimaryKey primaryKey;
+  final List<ForeignKeyConstraint> foreignKeys;
+  final List<UniqueKeyConstraint> uniqueKeys;
   // custom <class Table>
   // end <class Table>
 
@@ -87,7 +212,9 @@ class Table {
   Map toJson() => {
       "name": ebisu_utils.toJson(name),
       "columns": ebisu_utils.toJson(columns),
-      "constraints": ebisu_utils.toJson(constraints),
+      "primaryKey": ebisu_utils.toJson(primaryKey),
+      "foreignKeys": ebisu_utils.toJson(foreignKeys),
+      "uniqueKeys": ebisu_utils.toJson(uniqueKeys),
   };
 
   static Table fromJson(Object json) {
@@ -105,18 +232,27 @@ class Table {
     columns = ebisu_utils
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data)),
-    // constraints is List<Constraint>
-    constraints = ebisu_utils
-      .constructListFromJsonData(jsonMap["constraints"],
-                                 (data) => Constraint.fromJson(data));
+    primaryKey = PrimaryKey.fromJson(jsonMap["primaryKey"]),
+    // foreignKeys is List<ForeignKeyConstraint>
+    foreignKeys = ebisu_utils
+      .constructListFromJsonData(jsonMap["foreignKeys"],
+                                 (data) => ForeignKeyConstraint.fromJson(data)),
+    // uniqueKeys is List<UniqueKeyConstraint>
+    uniqueKeys = ebisu_utils
+      .constructListFromJsonData(jsonMap["uniqueKeys"],
+                                 (data) => UniqueKeyConstraint.fromJson(data));
 
   Table._copy(Table other) :
     name = other.name,
     columns = other.columns == null? null :
       (new List.from(other.columns.map((e) =>
         e == null? null : e.copy()))),
-    constraints = other.constraints == null? null :
-      (new List.from(other.constraints.map((e) =>
+    primaryKey = other.primaryKey == null? null : other.primaryKey.copy(),
+    foreignKeys = other.foreignKeys == null? null :
+      (new List.from(other.foreignKeys.map((e) =>
+        e == null? null : e.copy()))),
+    uniqueKeys = other.uniqueKeys == null? null :
+      (new List.from(other.uniqueKeys.map((e) =>
         e == null? null : e.copy())));
 
 }
@@ -162,24 +298,6 @@ class Column {
     nullable = other.nullable,
     autoIncrement = other.autoIncrement;
 
-}
-
-class Constraint {
-  const Constraint(this.name);
-
-  final String name;
-  // custom <class Constraint>
-  // end <class Constraint>
-}
-
-class ForeignKeyConstraint extends Constraint {
-  // custom <class ForeignKeyConstraint>
-  // end <class ForeignKeyConstraint>
-}
-
-class UniqueConstraint extends Constraint {
-  // custom <class UniqueConstraint>
-  // end <class UniqueConstraint>
 }
 
 // custom <library schema>

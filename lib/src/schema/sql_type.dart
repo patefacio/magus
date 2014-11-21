@@ -48,6 +48,8 @@ class SqlString extends Object with TypeExtensionMixin {
 class SqlInt extends Object with TypeExtensionMixin {
   SqlInt(this.length, this.displayLength, [ this.unsigned = false ]);
 
+  SqlInt._default();
+
   final int length;
   final int displayLength;
   final bool unsigned;
@@ -70,7 +72,7 @@ class SqlInt extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlInt()
+    return new SqlInt._default()
       .._fromJsonMapImpl(json);
   }
 
@@ -83,6 +85,8 @@ class SqlInt extends Object with TypeExtensionMixin {
 
 class SqlDecimal extends Object with TypeExtensionMixin {
   SqlDecimal(this.precision, this.scale, [ this.unsigned = false ]);
+
+  SqlDecimal._default();
 
   final int precision;
   final int scale;
@@ -105,7 +109,7 @@ class SqlDecimal extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlDecimal()
+    return new SqlDecimal._default()
       .._fromJsonMapImpl(json);
   }
 
@@ -118,6 +122,8 @@ class SqlDecimal extends Object with TypeExtensionMixin {
 
 class SqlBinary extends Object with TypeExtensionMixin {
   SqlBinary(this.length, [ this.isVarying = true ]);
+
+  SqlBinary._default();
 
   final int length;
   final bool isVarying;
@@ -138,7 +144,7 @@ class SqlBinary extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlBinary()
+    return new SqlBinary._default()
       .._fromJsonMapImpl(json);
   }
 
@@ -150,6 +156,8 @@ class SqlBinary extends Object with TypeExtensionMixin {
 
 class SqlFloat extends Object with TypeExtensionMixin {
   SqlFloat(this.precision, this.scale, [ this.unsigned = false ]);
+
+  SqlFloat._default();
 
   final int precision;
   final int scale;
@@ -172,7 +180,7 @@ class SqlFloat extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlFloat()
+    return new SqlFloat._default()
       .._fromJsonMapImpl(json);
   }
 
@@ -185,32 +193,18 @@ class SqlFloat extends Object with TypeExtensionMixin {
 
 class SqlDate extends Object with TypeExtensionMixin {
   // custom <class SqlDate>
+
+  Map toJson() => { };
+
+  static SqlDate fromJson(Object json) => new SqlDate();
+
   // end <class SqlDate>
-
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
-
-
-  Map toJson() => {
-// TODO: consider mixin support
-  };
-
-  static SqlDate fromJson(Object json) {
-    if(json == null) return null;
-    if(json is String) {
-      json = convert.JSON.decode(json);
-    }
-    assert(json is Map);
-    return new SqlDate()
-      .._fromJsonMapImpl(json);
-  }
-
-  void _fromJsonMapImpl(Map jsonMap) {
-  ;
-  }
 }
 
 class SqlTime extends Object with TypeExtensionMixin {
   SqlTime(this.hasTimezone);
+
+  SqlTime._default();
 
   final bool hasTimezone;
   // custom <class SqlTime>
@@ -229,7 +223,7 @@ class SqlTime extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlTime()
+    return new SqlTime._default()
       .._fromJsonMapImpl(json);
   }
 
@@ -240,6 +234,8 @@ class SqlTime extends Object with TypeExtensionMixin {
 
 class SqlTimestamp extends Object with TypeExtensionMixin {
   SqlTimestamp(this.hasTimezone, this.autoUpdate);
+
+  SqlTimestamp._default();
 
   final bool hasTimezone;
   final bool autoUpdate;
@@ -260,7 +256,7 @@ class SqlTimestamp extends Object with TypeExtensionMixin {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new SqlTimestamp()
+    return new SqlTimestamp._default()
       .._fromJsonMapImpl(json);
   }
 
