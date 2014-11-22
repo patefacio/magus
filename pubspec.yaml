@@ -7,7 +7,8 @@ dependencies:
 
   ini: ">=1.0.0"
   sqljocky: "any"
-  ebisu: "0.0.11"
+  ebisu:
+   git: git://github.com/patefacio/ebisu
 
 # end <magus dependencies>
 
@@ -24,4 +25,3 @@ transformers:
 
 # custom <magus transformers>
 # end <magus transformers>
-
