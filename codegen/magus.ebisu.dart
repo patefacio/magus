@@ -157,15 +157,23 @@ void main() {
           member('columns')..type = 'List<String>'..classInit = [],
         ],
         class_('table')
-        ..immutable = true
         ..jsonToString = true
-        ..members = [
-          member('name'),
-          member('columns')..type = 'List<Column>',
-          member('primary_key')..type = 'PrimaryKey',
-          member('foreign_keys')..type = 'List<ForeignKeyConstraint>',
-          member('unique_keys')..type = 'List<UniqueKeyConstraint>',
-        ],
+        ..members = (
+          [
+            member('name')..ctors = [''],
+            member('columns')..type = 'List<Column>',
+            member('primary_key')..type = 'PrimaryKey',
+            member('foreign_keys')..type = 'List<ForeignKeyConstraint>',
+            member('unique_keys')..type = 'List<UniqueKeyConstraint>'
+          ]
+          ..forEach((member) =>
+              member
+              ..isFinal = true
+              ..ctors = [''])
+          ..addAll([
+            member('pkey_columns')..type = 'List<Column>'..access = IA,
+            member('value_columns')..type = 'List<Column>'..access = IA,
+          ])),
         class_('column')
         ..jsonToString = true
         ..immutable = true
