@@ -6,6 +6,7 @@ import 'package:unittest/unittest.dart';
 import 'package:magus/schema.dart';
 import 'package:magus/odbc_ini.dart';
 import 'package:magus/mysql.dart';
+import 'package:quiver/iterables.dart';
 
 // end <additional imports>
 
@@ -20,8 +21,15 @@ main() {
     var reader = engine.createSchemaReader();
     var schema = (await reader.readSchema('code_metrics'));
 
-    print('Schema is $schema');
-    print('mysqlstring ddl is ${new SqlString(3)}');
+    schema.tables.forEach((Table table) {
+      print('''Fkeys for ${table.name} =>
+${
+
+schema.getDfsPath(table.name).map((e) => '${e.refTable.name} on => ${zip([e.foreignKey.columns, e.foreignKey.refColumns])}')
+
+}''');
+    });
+    //print('Schema is $schema');
 
   });
 

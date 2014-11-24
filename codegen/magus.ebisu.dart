@@ -127,13 +127,31 @@ void main() {
         class_('engine')..isAbstract = true,
         class_('schema_writer')..isAbstract = true,
         class_('schema_reader')..isAbstract = true,
-        class_('schema')
+        class_('fkey_path_entry')
+        ..doc = 'For a depth first search of related tables, this is one entry'
         ..immutable = true
-        ..jsonToString = true
         ..members = [
+          member('table')..doc = 'Table doing the referring'..type = 'Table',
+          member('ref_table')..doc = 'Table referred to with foreign key constraint'..type = 'Table',
+          member('foreign_key')..type = 'ForeignKeyConstraint',
+        ],
+        class_('schema')
+        ..ctorCustoms = ['']
+        ..jsonToString = true
+        ..members = ([
           member('name'),
           member('tables')..type = 'List<Table>',
-        ],
+        ]
+        ..forEach((member) =>
+            member
+            ..isFinal = true
+            ..ctors = [''])
+        ..addAll([
+          member('table_map')..type = 'Map<String, Table>'..access = IA..classInit = {},
+          member('dfs_fkey_paths')
+          ..doc = 'For each table a list of path entries comprising a depth-first-search of referred to tables'
+          ..type = 'Map<String, FkeyPathEntry>'..access = IA..classInit = {},
+        ])),
         class_('primary_key')
         ..jsonToString = true
         ..immutable = true

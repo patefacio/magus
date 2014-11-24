@@ -32,12 +32,53 @@ abstract class SchemaReader {
   // end <class SchemaReader>
 }
 
+/// For a depth first search of related tables, this is one entry
+class FkeyPathEntry {
+  const FkeyPathEntry(this.table, this.refTable, this.foreignKey);
+
+  /// Table doing the referring
+  final Table table;
+  /// Table referred to with foreign key constraint
+  final Table refTable;
+  final ForeignKeyConstraint foreignKey;
+  // custom <class FkeyPathEntry>
+  // end <class FkeyPathEntry>
+}
+
 class Schema {
-  const Schema(this.name, this.tables);
+  Schema(this.name, this.tables) {
+    // custom <Schema>
+    tables.forEach((Table table) {
+      assert(!_tableMap.containsKey(table.name));
+      _tableMap[table.name] = table;
+    });
+
+    tables.forEach((Table table) =>
+        _dfsFkeyPaths[table.name] = _dfsTableVisitorImpl(table, []));;
+
+    // end <Schema>
+  }
+
+  Schema._default();
 
   final String name;
   final List<Table> tables;
   // custom <class Schema>
+
+  Table getTable(String tableName) => _tableMap[tableName];
+  List<FkeyPathEntry> getDfsPath(String tableName) => _dfsFkeyPaths[tableName];
+
+  _dfsTableVisitorImpl(Table table, List<FkeyPathEntry> entries) {
+
+    table.foreignKeys.forEach((ForeignKeyConstraint fkey) {
+      final refTable = getTable(fkey.refTable);
+      _dfsTableVisitorImpl(refTable, entries);
+      entries.add(new FkeyPathEntry(table, refTable, fkey));
+    });
+
+    return entries;
+  }
+
   // end <class Schema>
 
   toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
@@ -46,6 +87,8 @@ class Schema {
   Map toJson() => {
       "name": ebisu_utils.toJson(name),
       "tables": ebisu_utils.toJson(tables),
+      "tableMap": ebisu_utils.toJson(_tableMap),
+      "dfsFkeyPaths": ebisu_utils.toJson(_dfsFkeyPaths),
   };
 
   static Schema fromJson(Object json) {
@@ -54,22 +97,33 @@ class Schema {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new Schema._fromJsonMapImpl(json);
+    return new Schema._default()
+      .._fromJsonMapImpl(json);
   }
 
-  Schema._fromJsonMapImpl(Map jsonMap) :
-    name = jsonMap["name"],
+  void _fromJsonMapImpl(Map jsonMap) {
+    name = jsonMap["name"];
     // tables is List<Table>
     tables = ebisu_utils
       .constructListFromJsonData(jsonMap["tables"],
-                                 (data) => Table.fromJson(data));
-
-  Schema._copy(Schema other) :
-    name = other.name,
-    tables = other.tables == null? null :
-      (new List.from(other.tables.map((e) =>
-        e == null? null : e.copy())));
-
+                                 (data) => Table.fromJson(data))
+    ;
+    // tableMap is Map<String, Table>
+    _tableMap = ebisu_utils
+      .constructMapFromJsonData(
+        jsonMap["tableMap"],
+        (value) => Table.fromJson(value))
+    ;
+    // dfsFkeyPaths is Map<String, FkeyPathEntry>
+    _dfsFkeyPaths = ebisu_utils
+      .constructMapFromJsonData(
+        jsonMap["dfsFkeyPaths"],
+        (value) => FkeyPathEntry.fromJson(value))
+  ;
+  }
+  Map<String, Table> _tableMap = {};
+  /// For each table a list of path entries comprising a depth-first-search of referred to tables
+  Map<String, FkeyPathEntry> _dfsFkeyPaths = {};
 }
 
 class PrimaryKey {
@@ -332,4 +386,5 @@ class Column {
 }
 
 // custom <library schema>
+
 // end <library schema>

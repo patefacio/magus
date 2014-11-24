@@ -176,9 +176,9 @@ class MysqlSchemaReader
   static ForeignKeyConstraint _makeForeignKeyConstraint(String keyText) {
     var match = _fkeyRe.firstMatch(keyText);
     assert(match != null);
-    final name = match.group(1);
+    final name = _pullId(match.group(1));
     final colsTxt = match.group(2);
-    final refTable = match.group(3);
+    final refTable = _pullId(match.group(3));
     final refColsTxt = match.group(4);
     return new ForeignKeyConstraint(name,
         refTable,
@@ -190,7 +190,7 @@ class MysqlSchemaReader
   static UniqueKeyConstraint _makeUniqueKeyConstraint(String keyText) {
     var match = _uniqueKeyRe.firstMatch(keyText);
     assert(match != null);
-    final name = match.group(1);
+    final name = _pullId(match.group(1));
     final colsTxt = match.group(2);
     return new UniqueKeyConstraint(name,
         colsTxt.split(_delimRe).map((id) => _pullId(id)).toList());
