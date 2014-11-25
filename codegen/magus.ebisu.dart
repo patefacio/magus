@@ -133,7 +133,7 @@ void main() {
         ..members = [
           member('table')..doc = 'Table doing the referring'..type = 'Table',
           member('ref_table')..doc = 'Table referred to with foreign key constraint'..type = 'Table',
-          member('foreign_key')..type = 'ForeignKeyConstraint',
+          member('foreign_key_spec')..type = 'ForeignKeySpec',
         ],
         class_('schema')
         ..ctorCustoms = ['']
@@ -152,45 +152,49 @@ void main() {
           ..doc = 'For each table a list of path entries comprising a depth-first-search of referred to tables'
           ..type = 'Map<String, FkeyPathEntry>'..access = IA..classInit = {},
         ])),
-        class_('primary_key')
-        ..jsonToString = true
-        ..immutable = true
-        ..members = [
-          member('columns')..type = 'List<String>'..classInit = [],
-        ],
-        class_('foreign_key_constraint')
+        class_('foreign_key_spec')
+        ..doc = 'Spec class for a ForeignKey - indicating the relationship by naming the tables and columns'
         ..jsonToString = true
         ..immutable = true
         ..members = [
           member('name'),
           member('ref_table'),
-          member('columns')..type = 'List<String>'..classInit = [],
-          member('ref_columns')..type = 'List<String>'..classInit = [],
+          member('columns')..type = 'List<String>',
+          member('ref_columns')..type = 'List<String>',
         ],
-        class_('unique_key_constraint')
+        class_('foreign_key')
+        ..immutable = true
+        ..members = [
+          member('name'),
+          member('ref_table')..type = 'Table',
+          member('columns')..type = 'List<Column>',
+          member('ref_columns')..type = 'List<Column>',
+        ],
+        class_('unique_key')
         ..jsonToString = true
         ..immutable = true
         ..members = [
           member('name'),
-          member('columns')..type = 'List<String>'..classInit = [],
+          member('columns')..type = 'List<Column>',
         ],
         class_('table')
         ..jsonToString = true
+        ..ctorCustoms = ['']
         ..members = (
           [
             member('name')..ctors = [''],
             member('columns')..type = 'List<Column>',
-            member('primary_key')..type = 'PrimaryKey',
-            member('foreign_keys')..type = 'List<ForeignKeyConstraint>',
-            member('unique_keys')..type = 'List<UniqueKeyConstraint>'
+            member('primary_key')..type = 'List<Column>',
+            member('unique_keys')..type = 'List<UniqueKey>',
+            member('foreign_key_specs')..type = 'List<ForeignKeySpec>',
           ]
           ..forEach((member) =>
               member
               ..isFinal = true
               ..ctors = [''])
           ..addAll([
-            member('pkey_columns')..type = 'List<Column>'..access = IA,
-            member('value_columns')..type = 'List<Column>'..access = IA,
+            member('value_columns')..type = 'List<Column>'..access = RO,
+            member('foreign_keys')..type = 'Map<String, ForeignKey>'..access = IA,
           ])),
         class_('column')
         ..jsonToString = true
@@ -230,6 +234,21 @@ void main() {
         ],
         part('schema_reader')
         ..classes = [
+          class_('unique_key_spec')
+          ..doc = 'Spec class for a UniqueKey - indicating the relationship by naming the columns in the unique constraint'
+          ..jsonToString = true
+          ..immutable = true
+          ..members = [
+            member('name'),
+            member('columns')..type = 'List<String>',
+          ],
+          class_('primary_key_spec')
+          ..doc = 'Spec class for a PrimaryKey - indicating the key columns with string names'
+          ..jsonToString = true
+          ..immutable = true
+          ..members = [
+            member('columns')..type = 'List<String>',
+          ],
           class_('mysql_schema_reader')
           ..immutable = true
           ..implement = [ 'SchemaReader' ]

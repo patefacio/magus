@@ -34,13 +34,13 @@ abstract class SchemaReader {
 
 /// For a depth first search of related tables, this is one entry
 class FkeyPathEntry {
-  const FkeyPathEntry(this.table, this.refTable, this.foreignKey);
+  const FkeyPathEntry(this.table, this.refTable, this.foreignKeySpec);
 
   /// Table doing the referring
   final Table table;
   /// Table referred to with foreign key constraint
   final Table refTable;
-  final ForeignKeyConstraint foreignKey;
+  final ForeignKeySpec foreignKeySpec;
   // custom <class FkeyPathEntry>
   // end <class FkeyPathEntry>
 }
@@ -70,7 +70,7 @@ class Schema {
 
   _dfsTableVisitorImpl(Table table, List<FkeyPathEntry> entries) {
 
-    table.foreignKeys.forEach((ForeignKeyConstraint fkey) {
+    table.foreignKeySpecs.forEach((ForeignKeySpec fkey) {
       final refTable = getTable(fkey.refTable);
       _dfsTableVisitorImpl(refTable, entries);
       entries.add(new FkeyPathEntry(table, refTable, fkey));
@@ -126,50 +126,16 @@ class Schema {
   Map<String, FkeyPathEntry> _dfsFkeyPaths = {};
 }
 
-class PrimaryKey {
-  const PrimaryKey(this.columns);
-
-  final List<String> columns;
-  // custom <class PrimaryKey>
-  // end <class PrimaryKey>
-
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
-
-
-  Map toJson() => {
-      "columns": ebisu_utils.toJson(columns),
-  };
-
-  static PrimaryKey fromJson(Object json) {
-    if(json == null) return null;
-    if(json is String) {
-      json = convert.JSON.decode(json);
-    }
-    assert(json is Map);
-    return new PrimaryKey._fromJsonMapImpl(json);
-  }
-
-  PrimaryKey._fromJsonMapImpl(Map jsonMap) :
-    // columns is List<String>
-    columns = ebisu_utils
-      .constructListFromJsonData(jsonMap["columns"],
-                                 (data) => data);
-
-  PrimaryKey._copy(PrimaryKey other) :
-    columns = other.columns == null? null: new List.from(other.columns);
-
-}
-
-class ForeignKeyConstraint {
-  const ForeignKeyConstraint(this.name, this.refTable, this.columns,
-    this.refColumns);
+/// Spec class for a ForeignKey - indicating the relationship by naming the tables and columns
+class ForeignKeySpec {
+  const ForeignKeySpec(this.name, this.refTable, this.columns, this.refColumns);
 
   final String name;
   final String refTable;
   final List<String> columns;
   final List<String> refColumns;
-  // custom <class ForeignKeyConstraint>
-  // end <class ForeignKeyConstraint>
+  // custom <class ForeignKeySpec>
+  // end <class ForeignKeySpec>
 
   toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
 
@@ -181,16 +147,16 @@ class ForeignKeyConstraint {
       "refColumns": ebisu_utils.toJson(refColumns),
   };
 
-  static ForeignKeyConstraint fromJson(Object json) {
+  static ForeignKeySpec fromJson(Object json) {
     if(json == null) return null;
     if(json is String) {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new ForeignKeyConstraint._fromJsonMapImpl(json);
+    return new ForeignKeySpec._fromJsonMapImpl(json);
   }
 
-  ForeignKeyConstraint._fromJsonMapImpl(Map jsonMap) :
+  ForeignKeySpec._fromJsonMapImpl(Map jsonMap) :
     name = jsonMap["name"],
     refTable = jsonMap["refTable"],
     // columns is List<String>
@@ -202,7 +168,7 @@ class ForeignKeyConstraint {
       .constructListFromJsonData(jsonMap["refColumns"],
                                  (data) => data);
 
-  ForeignKeyConstraint._copy(ForeignKeyConstraint other) :
+  ForeignKeySpec._copy(ForeignKeySpec other) :
     name = other.name,
     refTable = other.refTable,
     columns = other.columns == null? null: new List.from(other.columns),
@@ -210,13 +176,24 @@ class ForeignKeyConstraint {
 
 }
 
-class UniqueKeyConstraint {
-  const UniqueKeyConstraint(this.name, this.columns);
+class ForeignKey {
+  const ForeignKey(this.name, this.refTable, this.columns, this.refColumns);
 
   final String name;
-  final List<String> columns;
-  // custom <class UniqueKeyConstraint>
-  // end <class UniqueKeyConstraint>
+  final Table refTable;
+  final List<Column> columns;
+  final List<Column> refColumns;
+  // custom <class ForeignKey>
+  // end <class ForeignKey>
+}
+
+class UniqueKey {
+  const UniqueKey(this.name, this.columns);
+
+  final String name;
+  final List<Column> columns;
+  // custom <class UniqueKey>
+  // end <class UniqueKey>
 
   toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
 
@@ -226,63 +203,61 @@ class UniqueKeyConstraint {
       "columns": ebisu_utils.toJson(columns),
   };
 
-  static UniqueKeyConstraint fromJson(Object json) {
+  static UniqueKey fromJson(Object json) {
     if(json == null) return null;
     if(json is String) {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new UniqueKeyConstraint._fromJsonMapImpl(json);
+    return new UniqueKey._fromJsonMapImpl(json);
   }
 
-  UniqueKeyConstraint._fromJsonMapImpl(Map jsonMap) :
+  UniqueKey._fromJsonMapImpl(Map jsonMap) :
     name = jsonMap["name"],
-    // columns is List<String>
+    // columns is List<Column>
     columns = ebisu_utils
       .constructListFromJsonData(jsonMap["columns"],
-                                 (data) => data);
+                                 (data) => Column.fromJson(data));
 
-  UniqueKeyConstraint._copy(UniqueKeyConstraint other) :
+  UniqueKey._copy(UniqueKey other) :
     name = other.name,
-    columns = other.columns == null? null: new List.from(other.columns);
+    columns = other.columns == null? null :
+      (new List.from(other.columns.map((e) =>
+        e == null? null : e.copy())));
 
 }
 
 class Table {
-  Table(this.name, this.columns, this.primaryKey, this.foreignKeys,
-    this.uniqueKeys);
+  Table(this.name, this.columns, this.primaryKey, this.uniqueKeys,
+    this.foreignKeySpecs) {
+    // custom <Table>
+
+    assert(primaryKey.every((c) => columns.contains(c)));
+
+    _valueColumns = columns
+      .where((col) => !primaryKey.any((pkeyCol) => pkeyCol.name == col.name))
+      .toList();
+
+    // end <Table>
+  }
 
   Table._default();
 
   final String name;
   final List<Column> columns;
-  final PrimaryKey primaryKey;
-  final List<ForeignKeyConstraint> foreignKeys;
-  final List<UniqueKeyConstraint> uniqueKeys;
+  final List<Column> primaryKey;
+  final List<UniqueKey> uniqueKeys;
+  final List<ForeignKeySpec> foreignKeySpecs;
+  List<Column> get valueColumns => _valueColumns;
   // custom <class Table>
 
   Column getColumn(String column) =>
     columns.firstWhere((col) => col.name == column);
 
   get hasAutoIncrement => columns.any((c) => c.autoIncrement);
-  get hasForeignKey => foreignKeys.length > 0;
-
-  get pkeyColumns {
-    if(_pkeyColumns == null)
-      _pkeyColumns = primaryKey.columns.map((c) => getColumn(c)).toList();
-    return _pkeyColumns;
-  }
-
-  get valueColumns {
-    if(_valueColumns == null) {
-      _valueColumns = columns
-        .where((col) => !_pkeyColumns.any((pkeyCol) => pkeyCol.name == col.name))
-        .toList();
-    }
-    return _valueColumns;
-  }
-
+  get hasForeignKey => foreignKeySpecs.length > 0;
   get nonAutoColumns => columns.where((c) => !c.autoIncrement);
+  get pkeyColumns => primaryKey;
 
   // end <class Table>
 
@@ -293,10 +268,10 @@ class Table {
       "name": ebisu_utils.toJson(name),
       "columns": ebisu_utils.toJson(columns),
       "primaryKey": ebisu_utils.toJson(primaryKey),
-      "foreignKeys": ebisu_utils.toJson(foreignKeys),
       "uniqueKeys": ebisu_utils.toJson(uniqueKeys),
-      "pkeyColumns": ebisu_utils.toJson(_pkeyColumns),
-      "valueColumns": ebisu_utils.toJson(_valueColumns),
+      "foreignKeySpecs": ebisu_utils.toJson(foreignKeySpecs),
+      "valueColumns": ebisu_utils.toJson(valueColumns),
+      "foreignKeys": ebisu_utils.toJson(_foreignKeys),
   };
 
   static Table fromJson(Object json) {
@@ -316,30 +291,35 @@ class Table {
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data))
     ;
-    primaryKey = PrimaryKey.fromJson(jsonMap["primaryKey"]);
-    // foreignKeys is List<ForeignKeyConstraint>
-    foreignKeys = ebisu_utils
-      .constructListFromJsonData(jsonMap["foreignKeys"],
-                                 (data) => ForeignKeyConstraint.fromJson(data))
+    // primaryKey is List<Column>
+    primaryKey = ebisu_utils
+      .constructListFromJsonData(jsonMap["primaryKey"],
+                                 (data) => Column.fromJson(data))
     ;
-    // uniqueKeys is List<UniqueKeyConstraint>
+    // uniqueKeys is List<UniqueKey>
     uniqueKeys = ebisu_utils
       .constructListFromJsonData(jsonMap["uniqueKeys"],
-                                 (data) => UniqueKeyConstraint.fromJson(data))
+                                 (data) => UniqueKey.fromJson(data))
     ;
-    // pkeyColumns is List<Column>
-    _pkeyColumns = ebisu_utils
-      .constructListFromJsonData(jsonMap["pkeyColumns"],
-                                 (data) => Column.fromJson(data))
+    // foreignKeySpecs is List<ForeignKeySpec>
+    foreignKeySpecs = ebisu_utils
+      .constructListFromJsonData(jsonMap["foreignKeySpecs"],
+                                 (data) => ForeignKeySpec.fromJson(data))
     ;
     // valueColumns is List<Column>
     _valueColumns = ebisu_utils
       .constructListFromJsonData(jsonMap["valueColumns"],
                                  (data) => Column.fromJson(data))
+    ;
+    // foreignKeys is Map<String, ForeignKey>
+    _foreignKeys = ebisu_utils
+      .constructMapFromJsonData(
+        jsonMap["foreignKeys"],
+        (value) => ForeignKey.fromJson(value))
   ;
   }
-  List<Column> _pkeyColumns;
   List<Column> _valueColumns;
+  Map<String, ForeignKey> _foreignKeys;
 }
 
 class Column {

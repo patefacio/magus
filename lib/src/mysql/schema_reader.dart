@@ -1,5 +1,79 @@
 part of magus.mysql;
 
+/// Spec class for a UniqueKey - indicating the relationship by naming the columns in the unique constraint
+class UniqueKeySpec {
+  const UniqueKeySpec(this.name, this.columns);
+
+  final String name;
+  final List<String> columns;
+  // custom <class UniqueKeySpec>
+  // end <class UniqueKeySpec>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "columns": ebisu_utils.toJson(columns),
+  };
+
+  static UniqueKeySpec fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new UniqueKeySpec._fromJsonMapImpl(json);
+  }
+
+  UniqueKeySpec._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    // columns is List<String>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => data);
+
+  UniqueKeySpec._copy(UniqueKeySpec other) :
+    name = other.name,
+    columns = other.columns == null? null: new List.from(other.columns);
+
+}
+
+/// Spec class for a PrimaryKey - indicating the key columns with string names
+class PrimaryKeySpec {
+  const PrimaryKeySpec(this.columns);
+
+  final List<String> columns;
+  // custom <class PrimaryKeySpec>
+  // end <class PrimaryKeySpec>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "columns": ebisu_utils.toJson(columns),
+  };
+
+  static PrimaryKeySpec fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new PrimaryKeySpec._fromJsonMapImpl(json);
+  }
+
+  PrimaryKeySpec._fromJsonMapImpl(Map jsonMap) :
+    // columns is List<String>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => data);
+
+  PrimaryKeySpec._copy(PrimaryKeySpec other) :
+    columns = other.columns == null? null: new List.from(other.columns);
+
+}
+
 class MysqlSchemaReader
   implements SchemaReader {
   const MysqlSchemaReader(this._connectionPool);
@@ -35,9 +109,9 @@ class MysqlSchemaReader
     tableCreates.forEach((String tableName, String create) {
       // Output of create table puts one entry (column, primary key, unqique
       // key, constraint, etc per line. Parsing splits by line first
-      PrimaryKey primaryKey;
-      final uniqueKeyConstraints = [];
-      final foreignKeyConstraints = [];
+      PrimaryKeySpec primaryKeySpec;
+      final uniqueKeySpecs = [];
+      final foreignKeySpecs = [];
       final entries = create.split(_commaNl).map((s) => s.trim()).toList();
       assert(entries.first.contains('CREATE TABLE'));
       assert(entries.last.contains('ENGINE'));
@@ -48,18 +122,37 @@ class MysqlSchemaReader
           final column = _makeColumn(entry);
           columns.add(column);
         } else if(entry.contains('FOREIGN KEY')) {
-          foreignKeyConstraints.add(_makeForeignKeyConstraint(entry));
+          foreignKeySpecs.add(_makeForeignKeySpec(entry));
         } else if(entry.contains('PRIMARY KEY')) {
-          primaryKey = _makePrimaryKey(entry);
+          primaryKeySpec = _makePrimaryKeySpec(entry);
         } else if(entry.contains('UNIQUE KEY')) {
-          uniqueKeyConstraints.add(_makeUniqueKeyConstraint(entry));
+          uniqueKeySpecs.add(_makeUniqueKeySpec(entry));
         } else {
           //print("UNKONWN $tableName => $entry");
         }
 
       });
       assert(columns.length>0);
-      tables.add(new Table(tableName, columns, primaryKey, foreignKeyConstraints, uniqueKeyConstraints));
+
+      List pkeyColumns =
+        primaryKeySpec
+        .columns
+        .map((colName) => columns.firstWhere((column) => colName == column.name))
+        .toList();
+
+      List uniqueKeys =
+        uniqueKeySpecs
+        .map((UniqueKeySpec spec) =>
+            new UniqueKey(spec.name,
+              spec
+              .columns
+              .map((colName) => columns
+                  .firstWhere((column) => colName == column.name))
+              .toList()))
+        .toList();
+
+      tables.add(new Table(tableName, columns, pkeyColumns,
+              uniqueKeys, foreignKeySpecs));
     });
     return new Schema(schemaName, tables);
   }
@@ -173,35 +266,35 @@ class MysqlSchemaReader
   static String _pullId(String s) => _pullIdRe.firstMatch(s).group(1);
   static var _fkeyRe = new RegExp(r"CONSTRAINT (.+) FOREIGN KEY \(([^)]+)\) REFERENCES (.+) \(([^)]+)\)");
 
-  static ForeignKeyConstraint _makeForeignKeyConstraint(String keyText) {
+  static ForeignKeySpec _makeForeignKeySpec(String keyText) {
     var match = _fkeyRe.firstMatch(keyText);
     assert(match != null);
     final name = _pullId(match.group(1));
     final colsTxt = match.group(2);
     final refTable = _pullId(match.group(3));
     final refColsTxt = match.group(4);
-    return new ForeignKeyConstraint(name,
+    return new ForeignKeySpec(name,
         refTable,
         colsTxt.split(_delimRe).map((id) => _pullId(id)).toList(),
         refColsTxt.split(_delimRe).map((id) => _pullId(id)).toList());
   }
 
   static var _uniqueKeyRe = new RegExp(r"UNIQUE KEY (.+) \(([^)]+)\)");
-  static UniqueKeyConstraint _makeUniqueKeyConstraint(String keyText) {
+  static UniqueKeySpec _makeUniqueKeySpec(String keyText) {
     var match = _uniqueKeyRe.firstMatch(keyText);
     assert(match != null);
     final name = _pullId(match.group(1));
     final colsTxt = match.group(2);
-    return new UniqueKeyConstraint(name,
+    return new UniqueKeySpec(name,
         colsTxt.split(_delimRe).map((id) => _pullId(id)).toList());
   }
 
   static var _primaryKeyRe = new RegExp(r"PRIMARY KEY \(([^)]+)\)");
-  static PrimaryKey _makePrimaryKey(String keyText) {
+  static PrimaryKeySpec _makePrimaryKeySpec(String keyText) {
     var match = _primaryKeyRe.firstMatch(keyText);
     assert(match != null);
     final colTerms = match.group(1).split(_delimRe);
-    return new PrimaryKey(colTerms.map((id) => _pullId(id)).toList());
+    return new PrimaryKeySpec(colTerms.map((id) => _pullId(id)).toList());
   }
 
 
