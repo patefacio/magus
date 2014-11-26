@@ -10,6 +10,7 @@ void main() {
       print("${r.loggerName} [${r.level}]:\t${r.message}"));
   String here = path.absolute(Platform.script.path);
   _topDir = path.dirname(path.dirname(here));
+  bool jsonToString = true;
   System ebisu = system('magus')
     ..doc = 'Database schema retrieval'
     ..includeHop = true
@@ -42,6 +43,9 @@ void main() {
       ],
 
       library('schema')
+      ..imports = [
+        'package:quiver/iterables.dart'
+      ]
       ..parts = [
         part('sql_type')
         ..enums = [
@@ -65,7 +69,7 @@ void main() {
           ],
 
           class_('sql_int')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('length')..type = 'int'..isFinal = true..ctors = [''],
@@ -74,7 +78,7 @@ void main() {
           ],
 
           class_('sql_decimal')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('precision')..type = 'int'..isFinal = true..ctors = [''],
@@ -83,7 +87,7 @@ void main() {
           ],
 
           class_('sql_binary')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('length')..type = 'int'..isFinal = true..ctors = [''],
@@ -91,7 +95,7 @@ void main() {
           ],
 
           class_('sql_float')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('precision')..type = 'int'..isFinal = true..ctors = [''],
@@ -105,14 +109,14 @@ void main() {
           ],
 
           class_('sql_time')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
           ],
 
           class_('sql_timestamp')
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
@@ -129,15 +133,17 @@ void main() {
         class_('schema_reader')..isAbstract = true,
         class_('fkey_path_entry')
         ..doc = 'For a depth first search of related tables, this is one entry'
+        ..jsonToString = jsonToString
         ..immutable = true
         ..members = [
+          member('name')..doc = 'Name of the fkey constraint linking these tables',
           member('table')..doc = 'Table doing the referring'..type = 'Table',
           member('ref_table')..doc = 'Table referred to with foreign key constraint'..type = 'Table',
           member('foreign_key_spec')..type = 'ForeignKeySpec',
         ],
         class_('schema')
         ..ctorCustoms = ['']
-        ..jsonToString = true
+        ..jsonToString = jsonToString
         ..members = ([
           member('name'),
           member('tables')..type = 'List<Table>',
@@ -154,7 +160,7 @@ void main() {
         ])),
         class_('foreign_key_spec')
         ..doc = 'Spec class for a ForeignKey - indicating the relationship by naming the tables and columns'
-        ..jsonToString = true
+        ..jsonToString = jsonToString
         ..immutable = true
         ..members = [
           member('name'),
@@ -164,21 +170,22 @@ void main() {
         ],
         class_('foreign_key')
         ..immutable = true
+        ..jsonToString = jsonToString
         ..members = [
           member('name'),
-          member('ref_table')..type = 'Table',
           member('columns')..type = 'List<Column>',
+          member('ref_table')..type = 'Table',
           member('ref_columns')..type = 'List<Column>',
         ],
         class_('unique_key')
-        ..jsonToString = true
+        ..jsonToString = jsonToString
         ..immutable = true
         ..members = [
           member('name'),
           member('columns')..type = 'List<Column>',
         ],
         class_('table')
-        ..jsonToString = true
+        ..jsonToString = jsonToString
         ..ctorCustoms = ['']
         ..members = (
           [
@@ -194,10 +201,10 @@ void main() {
               ..ctors = [''])
           ..addAll([
             member('value_columns')..type = 'List<Column>'..access = RO,
-            member('foreign_keys')..type = 'Map<String, ForeignKey>'..access = IA,
+            member('foreign_keys')..type = 'Map<String, ForeignKey>'..access = RO,
           ])),
         class_('column')
-        ..jsonToString = true
+        ..jsonToString = jsonToString
         ..immutable = true
         ..members = [
           member('name'),
@@ -236,7 +243,7 @@ void main() {
         ..classes = [
           class_('unique_key_spec')
           ..doc = 'Spec class for a UniqueKey - indicating the relationship by naming the columns in the unique constraint'
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..immutable = true
           ..members = [
             member('name'),
@@ -244,7 +251,7 @@ void main() {
           ],
           class_('primary_key_spec')
           ..doc = 'Spec class for a PrimaryKey - indicating the key columns with string names'
-          ..jsonToString = true
+          ..jsonToString = jsonToString
           ..immutable = true
           ..members = [
             member('columns')..type = 'List<String>',

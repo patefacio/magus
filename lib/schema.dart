@@ -2,6 +2,7 @@ library magus.schema;
 
 import 'dart:convert' as convert;
 import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
+import 'package:quiver/iterables.dart';
 // custom <additional imports>
 // end <additional imports>
 
@@ -34,27 +35,87 @@ abstract class SchemaReader {
 
 /// For a depth first search of related tables, this is one entry
 class FkeyPathEntry {
-  const FkeyPathEntry(this.table, this.refTable, this.foreignKeySpec);
+  const FkeyPathEntry(this.name, this.table, this.refTable, this.foreignKeySpec);
 
+  /// Name of the fkey constraint linking these tables
+  final String name;
   /// Table doing the referring
   final Table table;
   /// Table referred to with foreign key constraint
   final Table refTable;
   final ForeignKeySpec foreignKeySpec;
   // custom <class FkeyPathEntry>
+
+  get _srcColNames => foreignKeySpec.columns;
+  get _refColNames => foreignKeySpec.refColumns;
+
   // end <class FkeyPathEntry>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "table": ebisu_utils.toJson(table),
+      "refTable": ebisu_utils.toJson(refTable),
+      "foreignKeySpec": ebisu_utils.toJson(foreignKeySpec),
+  };
+
+  static FkeyPathEntry fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new FkeyPathEntry._fromJsonMapImpl(json);
+  }
+
+  FkeyPathEntry._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    table = Table.fromJson(jsonMap["table"]),
+    refTable = Table.fromJson(jsonMap["refTable"]),
+    foreignKeySpec = ForeignKeySpec.fromJson(jsonMap["foreignKeySpec"]);
+
+  FkeyPathEntry._copy(FkeyPathEntry other) :
+    name = other.name,
+    table = other.table == null? null : other.table.copy(),
+    refTable = other.refTable == null? null : other.refTable.copy(),
+    foreignKeySpec = other.foreignKeySpec == null? null : other.foreignKeySpec.copy();
+
 }
 
 class Schema {
   Schema(this.name, this.tables) {
     // custom <Schema>
+
+    _tableMap = tables.fold({}, (prev, t) => prev..[t.name] = t);
+
+    assert(_tableMap.length == tables.length);
+
     tables.forEach((Table table) {
-      assert(!_tableMap.containsKey(table.name));
-      _tableMap[table.name] = table;
+      final tname = table.name;
+
+      if(!_dfsFkeyPaths.containsKey(tname)) {
+        final path = _dfsTableVisitorImpl(table, []);
+        _dfsFkeyPaths[tname] = path;
+
+        Map<String, ForeignKeys> fkeys = {};
+        if(!path.isEmpty) {
+          final directDecendents = path
+            .where((fpe) => fpe.table == table)
+            .forEach((FkeyPathEntry fpe) {
+              final refTable = fpe.refTable;
+              fkeys[fpe.name] = new ForeignKey(fpe.name,
+                  fpe._srcColNames.map((col) => table.getColumn(col)).toList(),
+                  refTable,
+                  fpe._refColNames.map((col) => refTable.getColumn(col)).toList());
+            });
+        }
+        table._foreignKeys = fkeys;
+      }
     });
 
-    tables.forEach((Table table) =>
-        _dfsFkeyPaths[table.name] = _dfsTableVisitorImpl(table, []));;
+    assert(_dfsFkeyPaths.length == tables.length);
 
     // end <Schema>
   }
@@ -73,7 +134,7 @@ class Schema {
     table.foreignKeySpecs.forEach((ForeignKeySpec fkey) {
       final refTable = getTable(fkey.refTable);
       _dfsTableVisitorImpl(refTable, entries);
-      entries.add(new FkeyPathEntry(table, refTable, fkey));
+      entries.add(new FkeyPathEntry(fkey.name, table, refTable, fkey));
     });
 
     return entries;
@@ -177,14 +238,59 @@ class ForeignKeySpec {
 }
 
 class ForeignKey {
-  const ForeignKey(this.name, this.refTable, this.columns, this.refColumns);
+  const ForeignKey(this.name, this.columns, this.refTable, this.refColumns);
 
   final String name;
-  final Table refTable;
   final List<Column> columns;
+  final Table refTable;
   final List<Column> refColumns;
   // custom <class ForeignKey>
+
+  get columnPairs => zip([ columns, refColumns ]);
+
   // end <class ForeignKey>
+
+  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+
+
+  Map toJson() => {
+      "name": ebisu_utils.toJson(name),
+      "columns": ebisu_utils.toJson(columns),
+      "refTable": ebisu_utils.toJson(refTable),
+      "refColumns": ebisu_utils.toJson(refColumns),
+  };
+
+  static ForeignKey fromJson(Object json) {
+    if(json == null) return null;
+    if(json is String) {
+      json = convert.JSON.decode(json);
+    }
+    assert(json is Map);
+    return new ForeignKey._fromJsonMapImpl(json);
+  }
+
+  ForeignKey._fromJsonMapImpl(Map jsonMap) :
+    name = jsonMap["name"],
+    // columns is List<Column>
+    columns = ebisu_utils
+      .constructListFromJsonData(jsonMap["columns"],
+                                 (data) => Column.fromJson(data)),
+    refTable = Table.fromJson(jsonMap["refTable"]),
+    // refColumns is List<Column>
+    refColumns = ebisu_utils
+      .constructListFromJsonData(jsonMap["refColumns"],
+                                 (data) => Column.fromJson(data));
+
+  ForeignKey._copy(ForeignKey other) :
+    name = other.name,
+    columns = other.columns == null? null :
+      (new List.from(other.columns.map((e) =>
+        e == null? null : e.copy()))),
+    refTable = other.refTable == null? null : other.refTable.copy(),
+    refColumns = other.refColumns == null? null :
+      (new List.from(other.refColumns.map((e) =>
+        e == null? null : e.copy())));
+
 }
 
 class UniqueKey {
@@ -249,6 +355,7 @@ class Table {
   final List<UniqueKey> uniqueKeys;
   final List<ForeignKeySpec> foreignKeySpecs;
   List<Column> get valueColumns => _valueColumns;
+  Map<String, ForeignKey> get foreignKeys => _foreignKeys;
   // custom <class Table>
 
   Column getColumn(String column) =>
@@ -258,6 +365,8 @@ class Table {
   get hasForeignKey => foreignKeySpecs.length > 0;
   get nonAutoColumns => columns.where((c) => !c.autoIncrement);
   get pkeyColumns => primaryKey;
+
+  isPrimaryKeyColumn(Column col) => primaryKey.contains(col);
 
   // end <class Table>
 
@@ -271,7 +380,7 @@ class Table {
       "uniqueKeys": ebisu_utils.toJson(uniqueKeys),
       "foreignKeySpecs": ebisu_utils.toJson(foreignKeySpecs),
       "valueColumns": ebisu_utils.toJson(valueColumns),
-      "foreignKeys": ebisu_utils.toJson(_foreignKeys),
+      "foreignKeys": ebisu_utils.toJson(foreignKeys),
   };
 
   static Table fromJson(Object json) {
