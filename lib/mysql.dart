@@ -5,7 +5,7 @@ import 'dart:convert' as convert;
 import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
 import 'package:magus/odbc_ini.dart';
 import 'package:magus/schema.dart';
-import 'package:sqljocky/sqljocky.dart';
+import 'package:sqljocky/sqljocky.dart' hide Query;
 // custom <additional imports>
 // end <additional imports>
 

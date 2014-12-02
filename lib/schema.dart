@@ -1,5 +1,6 @@
 library magus.schema;
 
+import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:mirrors';
 import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
@@ -8,17 +9,9 @@ import 'package:quiver/iterables.dart';
 // end <additional imports>
 
 part 'src/schema/sql_type.dart';
+part 'src/schema/engine.dart';
 part 'src/schema/dialect.dart';
 part 'src/schema/query.dart';
-
-abstract class Engine {
-  // custom <class Engine>
-
-  SchemaWriter createSchemaWriter();
-  SchemaReader createSchemaReader();
-
-  // end <class Engine>
-}
 
 abstract class SchemaWriter {
   // custom <class SchemaWriter>

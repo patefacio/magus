@@ -2,15 +2,41 @@ part of magus.mysql;
 
 class MysqlEngine
   implements Engine {
-  const MysqlEngine(this._connectionPool);
-
   // custom <class MysqlEngine>
+
+  MysqlEngine(this._connectionPool) :
+    _visitor = new MysqlVisitor();
 
   SchemaWriter createSchemaWriter() => new MysqlSchemaWriter(_connectionPool);
   SchemaReader createSchemaReader() => new MysqlSchemaReader(_connectionPool);
 
+  SchemaVisitor get schemaVisitor => _visitor;
+  TableVisitor get tableVisitor => _visitor;
+  ExprVisitor get exprVisitor => _visitor;
+  QueryVisitor get queryVisitor => _visitor;
+
+
   // end <class MysqlEngine>
   final ConnectionPool _connectionPool;
+  final MysqlVisitor _visitor;
+}
+
+class MysqlVisitor extends SqlVisitor {
+  // custom <class MysqlVisitor>
+
+  String dropAll(Schema schema) =>
+    'Mysql drop ${schema.tables.map((t) => t.name)} from schema';
+  String createAll(Schema schema) =>
+    'Mysql create ${schema.tables.map((t) => t.name)} from schema';
+  String createTable(Table table) =>
+    'Mysql create single table ${table.name}';
+  String dropTable(Table table) =>
+    'Mysql drop single table ${table.name}';
+
+  _returns(Query query) =>
+    query.returns.map((e) => evalExpr(e));
+
+  // end <class MysqlVisitor>
 }
 // custom <part engine>
 // end <part engine>

@@ -46,6 +46,7 @@ void main() {
       library('schema')
       ..imports = [
         'package:quiver/iterables.dart',
+        'async',
         'mirrors',
       ]
       ..parts = [
@@ -128,15 +129,19 @@ void main() {
           class_('sql_type_visitor')..isAbstract = true,
 
         ],
+        part('engine')
+        ..classes = [
+          class_('engine')..isAbstract = true,
+        ],
         part('dialect')
         ..classes = [
           class_('schema_visitor')..isAbstract = true,
           class_('table_visitor')..isAbstract = true,
           class_('expr_visitor')..isAbstract = true,
           class_('query_visitor')..isAbstract = true,
-
           class_('sql_visitor')..implement = [
-            'SchemaVisitor', 'TableVisitor', 'ExprVisitor', 'QueryVisitor' ],
+            'SchemaVisitor', 'TableVisitor', 'ExprVisitor', 'QueryVisitor'
+          ],
         ],
         part('query')
         ..classes = [
@@ -176,6 +181,8 @@ void main() {
           ],
           class_('is_null')
           ..extend = 'UnaryPred',
+          class_('not_null')
+          ..extend = 'UnaryPred',
           class_('not')
           ..extend = 'UnaryPred',
           class_('and')
@@ -186,9 +193,9 @@ void main() {
           ..extend = 'MultiPred',
           class_('multi_or')
           ..extend = 'MultiPred',
-          class_('equal')
+          class_('eq')
           ..extend = 'BinaryPred',
-          class_('not_equal')
+          class_('not_eq')
           ..extend = 'BinaryPred',
           class_('like')
           ..extend = 'BinaryPred',
@@ -211,7 +218,6 @@ void main() {
         ]
       ]
       ..classes = [
-        class_('engine')..isAbstract = true,
         class_('schema_writer')..isAbstract = true,
         class_('schema_reader')..isAbstract = true,
         class_('fkey_path_entry')
@@ -305,7 +311,7 @@ void main() {
       library('mysql')
       ..imports = [
         'dart:async',
-        'package:sqljocky/sqljocky.dart',
+        "'package:sqljocky/sqljocky.dart' hide Query",
         'package:magus/odbc_ini.dart',
         'package:magus/schema.dart',
       ]
@@ -313,11 +319,14 @@ void main() {
         part('engine')
         ..classes = [
           class_('mysql_engine')
-          ..immutable = true
           ..implement = [ 'Engine' ]
           ..members = [
-            member('connection_pool')..type = 'ConnectionPool'..access = IA
+            member('connection_pool')..type = 'ConnectionPool'..access = IA..isFinal = true,
+            member('visitor')..type = 'MysqlVisitor'..access = IA..isFinal = true
+            ..ctorInit = 'new MysqlVisitor',
           ],
+          class_('mysql_visitor')
+          ..extend = 'SqlVisitor',
         ],
         part('schema_writer')
         ..classes = [
