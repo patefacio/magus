@@ -7,6 +7,7 @@ import 'package:quiver/iterables.dart';
 // end <additional imports>
 
 part 'src/schema/sql_type.dart';
+part 'src/schema/query.dart';
 
 abstract class Engine {
   // custom <class Engine>

@@ -126,6 +126,67 @@ void main() {
           class_('sql_type_visitor')..isAbstract = true,
 
         ],
+        part('query')
+        ..classes = [
+          class_('expr')
+          ..doc = 'SQL Expression',
+          class_('literal')
+          ..extend = 'Expr',
+          class_('pred')
+          ..extend = 'Expr',
+          class_('unary_pred')
+          ..extend = 'Pred'
+          ..doc = 'Query unary predicate'
+          ..members = [
+            member('expr')..type = 'Expr',
+          ],
+          class_('binary_pred')
+          ..extend = 'Pred'
+          ..members = [
+            member('a')..type = 'Expr',
+            member('b')..type = 'Expr',
+          ],
+          class_('multi_pred')
+          ..extend = 'Pred'
+          ..members = [
+            member('exprs')..type = 'List<Expr>',
+          ],
+          class_('is_null')
+          ..extend = 'UnaryPred',
+          class_('not')
+          ..extend = 'UnaryPred',
+          class_('and')
+          ..extend = 'BinaryPred',
+          class_('or')
+          ..extend = 'BinaryPred',
+          class_('multi_and')
+          ..extend = 'MultiPred',
+          class_('multi_or')
+          ..extend = 'MultiPred',
+          class_('equal')
+          ..extend = 'BinaryPred',
+          class_('not_equal')
+          ..extend = 'BinaryPred',
+          class_('like')
+          ..extend = 'BinaryPred',
+          class_('gt')
+          ..extend = 'BinaryPred',
+          class_('lt')
+          ..extend = 'BinaryPred',
+          class_('ge')
+          ..extend = 'BinaryPred',
+          class_('le')
+          ..extend = 'BinaryPred',
+          class_('query')
+          ..immutable = true
+          ..builder = true
+          ..members = [
+            member('returns')..type = 'List<Expr>',
+            member('distinct')..classInit = false,
+            member('impute_joins')..classInit = true,
+            member('filter')..type = 'Pred',
+          ]
+        ]
       ]
       ..classes = [
         class_('engine')..isAbstract = true,
