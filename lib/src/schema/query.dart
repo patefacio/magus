@@ -2,17 +2,32 @@ part of magus.schema;
 
 /// SQL Expression
 class Expr {
+  Expr([ this.alias ]);
+
+  String alias;
   // custom <class Expr>
   // end <class Expr>
 }
 
+class Col extends Expr {
+  Column get column => _column;
+  // custom <class Col>
+  Col(this._column, [String alias]) : super(alias);
+  // end <class Col>
+  final Column _column;
+}
+
 class Literal extends Expr {
+  dynamic get value => _value;
   // custom <class Literal>
+  Col(this._value, [String alias]) : super(alias);
   // end <class Literal>
+  dynamic _value;
 }
 
 class Pred extends Expr {
   // custom <class Pred>
+  Pred([ String alias ]) : super(alias);
   // end <class Pred>
 }
 
@@ -20,6 +35,7 @@ class Pred extends Expr {
 class UnaryPred extends Pred {
   Expr expr;
   // custom <class UnaryPred>
+  Unary(this._expr, [String alias]) : super(alias);
   // end <class UnaryPred>
 }
 
@@ -102,44 +118,35 @@ class Le extends BinaryPred {
 }
 
 class Query {
-  const Query(this.returns, this.distinct, this.imputeJoins, this.filter);
-
-  final List<Expr> returns;
-  final bool distinct;
-  final bool imputeJoins;
-  final Pred filter;
-  // custom <class Query>
-  // end <class Query>
-}
-
-class QueryBuilder {
-  QueryBuilder();
-
-  List<Expr> returns;
+  List<Expr> returns = [];
   bool distinct = false;
-  bool imputeJoins = true;
   Pred filter;
-  // custom <class QueryBuilder>
-  // end <class QueryBuilder>
-  Query buildInstance() => new Query(
-    returns, distinct, imputeJoins, filter);
+  bool imputeJoins = true;
+  List<Table> get tables => _tables;
+  // custom <class Query>
 
-  factory QueryBuilder.copyFrom(Query _) =>
-    new QueryBuilder._copyImpl(_.copy());
+  Query(this.returns) {
+    Set tables = new Set();
+    returns
+      .where((r) => r is Col)
+      .forEach((r) => tables.add(r.column.table));
+    _tables = new List.from(tables);
+  }
 
-  QueryBuilder._copyImpl(Query _) :
-    returns = _.returns,
-    distinct = _.distinct,
-    imputeJoins = _.imputeJoins,
-    filter = _.filter;
-
-
+  // end <class Query>
+  List<Table> _tables = [];
 }
-
-/// Create a QueryBuilder sans new, for more declarative construction
-QueryBuilder
-queryBuilder() =>
-  new QueryBuilder();
-
 // custom <part query>
+
+_makeExpr(dynamic e) =>
+    e is Expr? e :
+    e is Column? new Col(e) :
+    throw '${e.runtimeType} is not convertible to Expr';
+
+makeExprs(Iterable<dynamic> exprs) =>
+  exprs.map((dynamic e) => _makeExpr(e));
+
+query(Iterable<dynamic> exprs) =>
+  new Query(makeExprs(exprs).toList());
+
 // end <part query>

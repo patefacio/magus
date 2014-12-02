@@ -16,7 +16,8 @@ void main() {
     ..includeHop = true
     ..rootPath = '$_topDir'
     ..testLibraries = [
-      library('schema_reading')
+      library('schema_reading'),
+      library('sql_generation'),
     ]
     ..libraries = [
 
@@ -44,7 +45,8 @@ void main() {
 
       library('schema')
       ..imports = [
-        'package:quiver/iterables.dart'
+        'package:quiver/iterables.dart',
+        'mirrors',
       ]
       ..parts = [
         part('sql_type')
@@ -126,12 +128,33 @@ void main() {
           class_('sql_type_visitor')..isAbstract = true,
 
         ],
+        part('dialect')
+        ..classes = [
+          class_('schema_visitor')..isAbstract = true,
+          class_('table_visitor')..isAbstract = true,
+          class_('expr_visitor')..isAbstract = true,
+          class_('query_visitor')..isAbstract = true,
+
+          class_('sql_visitor')..implement = [
+            'SchemaVisitor', 'TableVisitor', 'ExprVisitor', 'QueryVisitor' ],
+        ],
         part('query')
         ..classes = [
           class_('expr')
-          ..doc = 'SQL Expression',
+          ..doc = 'SQL Expression'
+          ..members = [
+            member('alias')..ctorsOpt = [''],
+          ],
+          class_('col')
+          ..extend = 'Expr'
+          ..members = [
+            member('column')..type = 'Column'..access = RO..isFinal = true,
+          ],
           class_('literal')
-          ..extend = 'Expr',
+          ..extend = 'Expr'
+          ..members = [
+            member('value')..type = 'dynamic'..access = RO,
+          ],
           class_('pred')
           ..extend = 'Expr',
           class_('unary_pred')
@@ -178,13 +201,12 @@ void main() {
           class_('le')
           ..extend = 'BinaryPred',
           class_('query')
-          ..immutable = true
-          ..builder = true
           ..members = [
-            member('returns')..type = 'List<Expr>',
+            member('returns')..type = 'List<Expr>'..classInit = [],
             member('distinct')..classInit = false,
-            member('impute_joins')..classInit = true,
             member('filter')..type = 'Pred',
+            member('impute_joins')..classInit = true,
+            member('tables')..type = 'List<Table>'..classInit = []..access = RO,
           ]
         ]
       ]
@@ -261,18 +283,24 @@ void main() {
               ..isFinal = true
               ..ctors = [''])
           ..addAll([
+            member('column_map')..type = 'Map<String, Column>'..access = IA..classInit = {},
             member('value_columns')..type = 'List<Column>'..access = RO,
             member('foreign_keys')..type = 'Map<String, ForeignKey>'..access = RO,
+            member('schema')..type = 'Schema'..access = RO..jsonTransient = true,
           ])),
         class_('column')
         ..jsonToString = jsonToString
-        ..immutable = true
-        ..members = [
-          member('name'),
-          member('type')..type = 'SqlType',
-          member('nullable')..type = 'bool',
-          member('auto_increment')..type = 'bool',
-        ],
+        ..members = (
+          [
+            member('name'),
+            member('type')..type = 'SqlType',
+            member('nullable')..type = 'bool',
+            member('auto_increment')..type = 'bool',
+          ]
+          ..forEach((member) => member..isFinal = true..ctors = [''])
+          ..addAll([
+            member('table')..type = 'Table'..access = RO..jsonTransient = true,
+          ])),
       ],
       library('mysql')
       ..imports = [

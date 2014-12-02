@@ -23,13 +23,14 @@ main() {
 
     schema.tables.forEach((Table table) {
       print('''Fkeys for ${table.name} =>
-${
-
-schema.getDfsPath(table.name).map((e) => '${e.refTable.name} on => ${zip([e.foreignKey.columns, e.foreignKey.refColumns])}')
-
+${table.foreignKeys}
 }''');
+
+      print(new Col(table.columns.first));
+
     });
     //print('Schema is $schema');
+
 
   });
 

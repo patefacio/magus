@@ -1,12 +1,14 @@
 library magus.schema;
 
 import 'dart:convert' as convert;
+import 'dart:mirrors';
 import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
 import 'package:quiver/iterables.dart';
 // custom <additional imports>
 // end <additional imports>
 
 part 'src/schema/sql_type.dart';
+part 'src/schema/dialect.dart';
 part 'src/schema/query.dart';
 
 abstract class Engine {
@@ -94,6 +96,7 @@ class Schema {
     assert(_tableMap.length == tables.length);
 
     tables.forEach((Table table) {
+      table._schema = this;
       final tname = table.name;
 
       if(!_dfsFkeyPaths.containsKey(tname)) {
@@ -128,6 +131,19 @@ class Schema {
   // custom <class Schema>
 
   Table getTable(String tableName) => _tableMap[tableName];
+  Iterable<Table> getTables(Iterable<String> tnames) =>
+    tnames.map((String tname) => getTable(tname));
+
+  noSuchMethod(Invocation invocation) {
+    if(invocation.isGetter) {
+      String tname = MirrorSystem.getName(invocation.memberName);
+      final result = getTable(tname);
+      if(result != null)
+        return result;
+    }
+    return super.noSuchMethod(invocation);
+  }
+
   List<FkeyPathEntry> getDfsPath(String tableName) => _dfsFkeyPaths[tableName];
 
   _dfsTableVisitorImpl(Table table, List<FkeyPathEntry> entries) {
@@ -339,6 +355,12 @@ class Table {
     this.foreignKeySpecs) {
     // custom <Table>
 
+    columns.forEach((Column c) {
+      c._table = this;
+      _columnMap[c.name] = c;
+    });
+
+    assert(_columnMap.length == columns.length);
     assert(primaryKey.every((c) => columns.contains(c)));
 
     _valueColumns = columns
@@ -357,10 +379,22 @@ class Table {
   final List<ForeignKeySpec> foreignKeySpecs;
   List<Column> get valueColumns => _valueColumns;
   Map<String, ForeignKey> get foreignKeys => _foreignKeys;
+  Schema get schema => _schema;
   // custom <class Table>
 
-  Column getColumn(String column) =>
-    columns.firstWhere((col) => col.name == column);
+  Column getColumn(String columnName) => _columnMap[columnName];
+  Iterable<Column> getColumns(Iterable<String> cnames) =>
+    cnames.map((String cname) => getColumn(cname));
+
+  noSuchMethod(Invocation invocation) {
+    if(invocation.isGetter) {
+      String cname = MirrorSystem.getName(invocation.memberName);
+      final result = getColumn(cname);
+      if(result != null)
+        return result;
+    }
+    return super.noSuchMethod(invocation);
+  }
 
   get hasAutoIncrement => columns.any((c) => c.autoIncrement);
   get hasForeignKey => foreignKeySpecs.length > 0;
@@ -380,6 +414,7 @@ class Table {
       "primaryKey": ebisu_utils.toJson(primaryKey),
       "uniqueKeys": ebisu_utils.toJson(uniqueKeys),
       "foreignKeySpecs": ebisu_utils.toJson(foreignKeySpecs),
+      "columnMap": ebisu_utils.toJson(_columnMap),
       "valueColumns": ebisu_utils.toJson(valueColumns),
       "foreignKeys": ebisu_utils.toJson(foreignKeys),
   };
@@ -416,6 +451,12 @@ class Table {
       .constructListFromJsonData(jsonMap["foreignKeySpecs"],
                                  (data) => ForeignKeySpec.fromJson(data))
     ;
+    // columnMap is Map<String, Column>
+    _columnMap = ebisu_utils
+      .constructMapFromJsonData(
+        jsonMap["columnMap"],
+        (value) => Column.fromJson(value))
+    ;
     // valueColumns is List<Column>
     _valueColumns = ebisu_utils
       .constructListFromJsonData(jsonMap["valueColumns"],
@@ -428,17 +469,22 @@ class Table {
         (value) => ForeignKey.fromJson(value))
   ;
   }
+  Map<String, Column> _columnMap = {};
   List<Column> _valueColumns;
   Map<String, ForeignKey> _foreignKeys;
+  Schema _schema;
 }
 
 class Column {
-  const Column(this.name, this.type, this.nullable, this.autoIncrement);
+  Column(this.name, this.type, this.nullable, this.autoIncrement);
+
+  Column._default();
 
   final String name;
   final SqlType type;
   final bool nullable;
   final bool autoIncrement;
+  Table get table => _table;
   // custom <class Column>
   // end <class Column>
 
@@ -458,21 +504,17 @@ class Column {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new Column._fromJsonMapImpl(json);
+    return new Column._default()
+      .._fromJsonMapImpl(json);
   }
 
-  Column._fromJsonMapImpl(Map jsonMap) :
-    name = jsonMap["name"],
-    type = SqlType.fromJson(jsonMap["type"]),
-    nullable = jsonMap["nullable"],
+  void _fromJsonMapImpl(Map jsonMap) {
+    name = jsonMap["name"];
+    type = SqlType.fromJson(jsonMap["type"]);
+    nullable = jsonMap["nullable"];
     autoIncrement = jsonMap["autoIncrement"];
-
-  Column._copy(Column other) :
-    name = other.name,
-    type = other.type == null? null : other.type.copy(),
-    nullable = other.nullable,
-    autoIncrement = other.autoIncrement;
-
+  }
+  Table _table;
 }
 
 // custom <library schema>
