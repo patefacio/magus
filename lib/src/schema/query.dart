@@ -9,6 +9,9 @@ class Expr {
 
   toString() => 'Some Expr';
 
+  get aliased => alias != null?
+    '$this as $alias' : toString();
+
   // end <class Expr>
 }
 
@@ -19,9 +22,7 @@ class Col extends Expr {
 
   get name => '${_column.table.name}.${_column.name}';
 
-  toString() =>
-    alias != null?
-    '$name as $alias' : name;
+  toString() => name;
 
   // end <class Col>
   final Column _column;
@@ -44,6 +45,30 @@ class Pred extends Expr {
   // custom <class Pred>
   Pred([ String alias ]) : super(alias);
   // end <class Pred>
+}
+
+class UnaryExpr extends Expr {
+  Expr expr;
+  // custom <class UnaryExpr>
+
+  UnaryExpr(e, [String alias]) :
+    super(alias),
+    expr = makeExpr(e);
+
+  // end <class UnaryExpr>
+}
+
+class BinaryExpr extends Expr {
+  Expr a;
+  Expr b;
+  // custom <class BinaryExpr>
+
+  BinaryExpr(a, b, [ String alias ]) :
+    super(alias),
+    this.a = makeExpr(a),
+    this.b = makeExpr(b);
+
+  // end <class BinaryExpr>
 }
 
 /// Query unary predicate
@@ -165,7 +190,7 @@ class Eq extends BinaryPred {
   Eq(a, b, [String alias]) :
     super(a, b, alias);
 
-  toString() => '$a == $b';
+  toString() => '$a = $b';
 
   // end <class Eq>
 }
@@ -236,6 +261,50 @@ class Le extends BinaryPred {
   // end <class Le>
 }
 
+class Abs extends UnaryExpr {
+  // custom <class Abs>
+
+  Abs(expr, [String alias]) :
+    super(makeExpr(expr), alias);
+
+  toString() => 'ABS($expr)';
+
+// end <class Abs>
+}
+
+class Plus extends BinaryExpr {
+  // custom <class Plus>
+
+  Plus(a, b, [String alias]) :
+    super(a, b, alias);
+
+  toString() => '$a - $b';
+
+  // end <class Plus>
+}
+
+class Minus extends BinaryExpr {
+  // custom <class Minus>
+
+  Minus(a, b, [String alias]) :
+    super(a, b, alias);
+
+  toString() => '$a - $b';
+
+  // end <class Minus>
+}
+
+class Times extends BinaryExpr {
+  // custom <class Times>
+
+  Times(a, b, [String alias]) :
+    super(a, b, alias);
+
+  toString() => '$a * $b';
+
+  // end <class Times>
+}
+
 class Query {
   List<Expr> returns = [];
   bool distinct = false;
@@ -269,14 +338,19 @@ makeExprs(Iterable<dynamic> exprs) =>
 query(Iterable<dynamic> exprs) =>
   new Query(makeExprs(exprs).toList());
 
-and(a, b, [alias]) => new And(a,b,alias);
-ands(Iterable exprs, [alias]) => new MultiAnd(exprs,alias);
-or(a, b, [alias]) => new Or(a,b,alias);
-ors(Iterable exprs, [alias]) => new MultiOr(exprs,alias);
-eq(a, b, [alias]) => new Eq(a,b,alias);
-neq(a, b, [alias]) => new NotEq(a,b,alias);
+and(a, b, [alias]) => new And(a, b, alias);
+ands(Iterable exprs, [alias]) => new MultiAnd(exprs, alias);
+or(a, b, [alias]) => new Or(a, b, alias);
+ors(Iterable exprs, [alias]) => new MultiOr(exprs, alias);
+not(expr, [alias]) => new Not(expr, alias);
+eq(a, b, [alias]) => new Eq(a, b, alias);
+ne(a, b, [alias]) => new NotEq(a, b, alias);
 notNull(expr, [alias]) => new NotNull(expr, alias);
 ge(expr, [alias]) => new Ge(expr, alias);
 le(expr, [alias]) => new Le(expr, alias);
+abs(expr, [alias]) => new Abs(expr, alias);
+plus(a, b, [alias]) => new Plus(a, b, alias);
+minus(a, b, [alias]) => new Minus(a, b, alias);
+times(a, b, [alias]) => new Times(a, b, alias);
 
 // end <part query>

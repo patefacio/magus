@@ -54,7 +54,6 @@ class SqlVisitor
   String dropTable(Table table) =>
     'Generic drop single table ${table.name}';
 
-  String evalExpr(Expr expr) => '$expr';
 
   String select(Query query) => '''
 select
@@ -71,7 +70,7 @@ ${_filter(query)}
   }
 
   _returns(Query query) =>
-    query.returns.map((e) => evalExpr(e));
+    query.returns.map((e) => e.aliased);
 
   // end <class SqlVisitor>
 }

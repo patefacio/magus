@@ -162,6 +162,17 @@ void main() {
           ],
           class_('pred')
           ..extend = 'Expr',
+          class_('unary_expr')
+          ..extend = 'Expr'
+          ..members = [
+            member('expr')..type = 'Expr',
+          ],
+          class_('binary_expr')
+          ..extend = 'Expr'
+          ..members = [
+            member('a')..type = 'Expr',
+            member('b')..type = 'Expr',
+          ],
           class_('unary_pred')
           ..extend = 'Pred'
           ..doc = 'Query unary predicate'
@@ -207,6 +218,14 @@ void main() {
           ..extend = 'BinaryPred',
           class_('le')
           ..extend = 'BinaryPred',
+          class_('abs')
+          ..extend = 'UnaryExpr',
+          class_('plus')
+          ..extend = 'BinaryExpr',
+          class_('minus')
+          ..extend = 'BinaryExpr',
+          class_('times')
+          ..extend = 'BinaryExpr',
           class_('query')
           ..members = [
             member('returns')..type = 'List<Expr>'..classInit = [],
