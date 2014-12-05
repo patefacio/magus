@@ -397,10 +397,15 @@ class Join {
   // end <class Join>
 }
 
+/// Build a query by specifying returns, joins, and a filter (i.e. where
+/// clause). The query builder will find all tables referenced by the returns and
+/// filter expressions in order to collect all tables that need to be
+/// specified. Joins can be imputed for normal foreign key relationships by
+/// traversing all fkey relationships on the tables referenced by the query. Joins
+/// are imputed with equality expressions linking the two tables.
+///
 class Query {
   final List<Expr> returns;
-  /// Table to be queried and joined against
-  final Table table;
   List<Join> get joins => _joins;
   final bool imputeJoins;
   final Pred filter;
@@ -409,12 +414,11 @@ class Query {
   List<Table> get tables => _tables;
   // custom <class Query>
 
-  Query._all(this.returns, this.table, this._joins, this.imputeJoins, this.filter,
+  Query._all(this.returns, this._joins, this.imputeJoins, this.filter,
     this.distinct, this._tables);
 
   factory Query(List columnsOrExprs,
       {
-        Table table : null,
         List<Joins> joins : null,
         bool imputeJoins : true,
         Pred filter : null,
@@ -442,7 +446,7 @@ class Query {
         imputedJoins : (joins..addAll(imputedJoins));
     }
 
-    return new Query._all(exprs, table, joins, imputeJoins, filter,
+    return new Query._all(exprs, joins, imputeJoins, filter,
         distinct, tables.toList());
   }
 

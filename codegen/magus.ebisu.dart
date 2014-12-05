@@ -243,11 +243,16 @@ void main() {
             member('join_type')..type = 'JoinType',
           ],
           class_('query')
+          ..doc = '''
+Build a query by specifying returns, joins, and a filter (i.e. where
+clause). The query builder will find all tables referenced by the returns and
+filter expressions in order to collect all tables that need to be
+specified. Joins can be imputed for normal foreign key relationships by
+traversing all fkey relationships on the tables referenced by the query. Joins
+are imputed with equality expressions linking the two tables.
+'''
           ..members = ([
             member('returns')..type = 'List<Expr>',
-            member('table')
-            ..doc = 'Table to be queried and joined against'
-            ..type = 'Table',
             member('joins')..type = 'List<Join>'..access = RO,
             member('impute_joins')..type = 'bool',
             member('filter')..type = 'Pred',
