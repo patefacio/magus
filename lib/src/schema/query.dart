@@ -1,5 +1,56 @@
 part of magus.schema;
 
+class JoinType implements Comparable<JoinType> {
+  static const INNER = const JoinType._(0);
+  static const LEFT = const JoinType._(1);
+  static const RIGHT = const JoinType._(2);
+  static const FULL = const JoinType._(3);
+
+  static get values => [
+    INNER,
+    LEFT,
+    RIGHT,
+    FULL
+  ];
+
+  final int value;
+
+  int get hashCode => value;
+
+  const JoinType._(this.value);
+
+  copy() => this;
+
+  int compareTo(JoinType other) => value.compareTo(other.value);
+
+  String toString() {
+    switch(this) {
+      case INNER: return "Inner";
+      case LEFT: return "Left";
+      case RIGHT: return "Right";
+      case FULL: return "Full";
+    }
+    return null;
+  }
+
+  static JoinType fromString(String s) {
+    if(s == null) return null;
+    switch(s) {
+      case "Inner": return INNER;
+      case "Left": return LEFT;
+      case "Right": return RIGHT;
+      case "Full": return FULL;
+      default: return null;
+    }
+  }
+
+  int toJson() => value;
+  static JoinType fromJson(int v) {
+    return v==null? null : values[v];
+  }
+
+}
+
 /// SQL Expression
 class Expr {
   Expr([ this.alias ]);
@@ -305,11 +356,20 @@ class Times extends BinaryExpr {
   // end <class Times>
 }
 
+class Join {
+  Table table;
+  JoinType joinType;
+  Expr joinExpr;
+  // custom <class Join>
+  // end <class Join>
+}
+
 class Query {
   List<Expr> returns = [];
   bool distinct = false;
   Pred filter;
   bool imputeJoins = true;
+  List<Join> get joins => _joins;
   List<Table> get tables => _tables;
   // custom <class Query>
 
@@ -322,6 +382,7 @@ class Query {
   }
 
   // end <class Query>
+  List<Join> _joins = [];
   List<Table> _tables = [];
 }
 // custom <part query>

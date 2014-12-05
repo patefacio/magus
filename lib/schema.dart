@@ -1,6 +1,7 @@
 library magus.schema;
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert' as convert;
 import 'dart:mirrors';
 import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
@@ -88,6 +89,12 @@ class Schema {
 
     assert(_tableMap.length == tables.length);
 
+    // first sort the tables by name
+    tables.sort((a,b) => a.name.compareTo(b.name));
+
+    // While iterating over tables track how many tables directly refer to each
+    Map<Table, int> deps = {};
+
     tables.forEach((Table table) {
       table._schema = this;
       final tname = table.name;
@@ -97,22 +104,29 @@ class Schema {
         _dfsFkeyPaths[tname] = path;
 
         Map<String, ForeignKeys> fkeys = {};
-        if(!path.isEmpty) {
-          final directDecendents = path
-            .where((fpe) => fpe.table == table)
-            .forEach((FkeyPathEntry fpe) {
-              final refTable = fpe.refTable;
-              fkeys[fpe.name] = new ForeignKey(fpe.name,
-                  fpe._srcColNames.map((col) => table.getColumn(col)).toList(),
-                  refTable,
-                  fpe._refColNames.map((col) => refTable.getColumn(col)).toList());
-            });
-        }
+        path
+          .where((fpe) => fpe.table == table)
+          .forEach((FkeyPathEntry fpe) {
+            final refTable = fpe.refTable;
+
+            // Found a table referring to refTable
+            if(deps.containsKey(refTable)) {
+              deps[refTable]++;
+            } else {
+              deps[refTable] = 1;
+            }
+
+            assert(!fkeys.containsKey(fpe.name));
+            fkeys[fpe.name] = new ForeignKey(fpe.name,
+                fpe._srcColNames.map((col) => table.getColumn(col)).toList(),
+                refTable,
+                fpe._refColNames.map((col) => refTable.getColumn(col)).toList());
+          });
         table._foreignKeys = fkeys;
       }
     });
 
-    assert(_dfsFkeyPaths.length == tables.length);
+    _orderTablesByRelations(deps);
 
     // end <Schema>
   }
@@ -130,9 +144,11 @@ class Schema {
   noSuchMethod(Invocation invocation) {
     if(invocation.isGetter) {
       String tname = MirrorSystem.getName(invocation.memberName);
-      final result = getTable(tname);
-      if(result != null)
-        return result;
+      if(tname.startsWith('_')) {
+        final result = getTable(tname.substring(1));
+        if(result != null)
+          return result;
+      }
     }
     return super.noSuchMethod(invocation);
   }
@@ -148,6 +164,31 @@ class Schema {
     });
 
     return entries;
+  }
+
+  // It is useful to be able to iterate over tables in an order allowing table
+  // deletion/construction. This function finds all tables with no dependencies
+  // on it, walks their dependencies dfs to get ordering. Reassigns list of
+  // table with that ordering
+  _orderTablesByRelations(Map<Table, int> deps) {
+
+    var ordered = new LinkedHashSet<Table>.identity();
+    addToOrdered(Table table) {
+      table
+        .foreignKeys
+        .values
+        .forEach((ForeignKey fk) => addToOrdered(fk.refTable));
+      ordered.add(table);
+    };
+
+    tables
+      .where((t) => !deps.containsKey(t))
+      .forEach((t) => addToOrdered(t));
+
+    assert(_dfsFkeyPaths.length == tables.length);
+    assert(ordered.length == tables.length);
+
+    tables..clear()..addAll(ordered);
   }
 
   // end <class Schema>
@@ -382,9 +423,11 @@ class Table {
   noSuchMethod(Invocation invocation) {
     if(invocation.isGetter) {
       String cname = MirrorSystem.getName(invocation.memberName);
-      final result = getColumn(cname);
-      if(result != null)
-        return result;
+      if(cname.startsWith('_')) {
+        final result = getColumn(cname.substring(1));
+        if(result != null)
+          return result;
+      }
     }
     return super.noSuchMethod(invocation);
   }

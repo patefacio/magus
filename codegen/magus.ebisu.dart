@@ -47,12 +47,11 @@ void main() {
       ..imports = [
         'package:quiver/iterables.dart',
         'async',
+        'collection',
         'mirrors',
       ]
       ..parts = [
         part('sql_type')
-        ..enums = [
-        ]
         ..classes = [
           class_('sql_type')..isAbstract = true,
 
@@ -144,6 +143,13 @@ void main() {
           ],
         ],
         part('query')
+        ..enums = [
+          enum_('join_type')
+          ..jsonSupport = true
+          ..values = [
+            id('inner'), id('left'), id('right'), id('full'),
+          ],
+        ]
         ..classes = [
           class_('expr')
           ..doc = 'SQL Expression'
@@ -226,12 +232,19 @@ void main() {
           ..extend = 'BinaryExpr',
           class_('times')
           ..extend = 'BinaryExpr',
+          class_('join')
+          ..members = [
+            member('table')..type = 'Table',
+            member('join_type')..type = 'JoinType',
+            member('join_expr')..type = 'Expr',
+          ],
           class_('query')
           ..members = [
             member('returns')..type = 'List<Expr>'..classInit = [],
             member('distinct')..classInit = false,
             member('filter')..type = 'Pred',
             member('impute_joins')..classInit = true,
+            member('joins')..type = 'List<Join>'..classInit = []..access = RO,
             member('tables')..type = 'List<Table>'..classInit = []..access = RO,
           ]
         ]
