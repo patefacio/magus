@@ -25,10 +25,10 @@ class JoinType implements Comparable<JoinType> {
 
   String toString() {
     switch(this) {
-      case INNER: return "Inner";
-      case LEFT: return "Left";
-      case RIGHT: return "Right";
-      case FULL: return "Full";
+      case INNER: return "inner";
+      case LEFT: return "left";
+      case RIGHT: return "right";
+      case FULL: return "full";
     }
     return null;
   }
@@ -36,10 +36,10 @@ class JoinType implements Comparable<JoinType> {
   static JoinType fromString(String s) {
     if(s == null) return null;
     switch(s) {
-      case "Inner": return INNER;
-      case "Left": return LEFT;
-      case "Right": return RIGHT;
-      case "Full": return FULL;
+      case "inner": return INNER;
+      case "left": return LEFT;
+      case "right": return RIGHT;
+      case "full": return FULL;
       default: return null;
     }
   }
@@ -51,8 +51,13 @@ class JoinType implements Comparable<JoinType> {
 
 }
 
+const INNER = JoinType.INNER;
+const LEFT = JoinType.LEFT;
+const RIGHT = JoinType.RIGHT;
+const FULL = JoinType.FULL;
+
 /// SQL Expression
-class Expr {
+abstract class Expr {
   Expr([ this.alias ]);
 
   String alias;
@@ -62,6 +67,8 @@ class Expr {
 
   get aliased => alias != null?
     '$this as $alias' : toString();
+
+  addColumns(Set<Column> out);
 
   // end <class Expr>
 }
@@ -75,6 +82,8 @@ class Col extends Expr {
 
   toString() => name;
 
+  addColumns(Set<Column> out) => out.add(_column);
+
   // end <class Col>
   final Column _column;
 }
@@ -87,6 +96,8 @@ class Literal extends Expr {
 
   toString() =>
     _value is String? "'$_value'" : '$_value';
+
+  addColumns(Set<Column> out) {}
 
   // end <class Literal>
   dynamic _value;
@@ -106,6 +117,8 @@ class UnaryExpr extends Expr {
     super(alias),
     expr = makeExpr(e);
 
+  addColumns(Set<Column> out) => expr.addColumns(out);
+
   // end <class UnaryExpr>
 }
 
@@ -119,6 +132,11 @@ class BinaryExpr extends Expr {
     this.a = makeExpr(a),
     this.b = makeExpr(b);
 
+  addColumns(Set<Column> out) {
+    a.addColumns(out);
+    b.addColumns(out);
+  }
+
   // end <class BinaryExpr>
 }
 
@@ -130,6 +148,8 @@ class UnaryPred extends Pred {
   UnaryPred(e, [String alias]) :
     super(alias),
     expr = makeExpr(e);
+
+  addColumns(Set<Column> out) => expr.addColumns(out);
 
   // end <class UnaryPred>
 }
@@ -144,6 +164,11 @@ class BinaryPred extends Pred {
     this.a = makeExpr(a),
     this.b = makeExpr(b);
 
+  addColumns(Set<Column> out) {
+    a.addColumns(out);
+    b.addColumns(out);
+  }
+
   // end <class BinaryPred>
 }
 
@@ -154,6 +179,9 @@ class MultiPred extends Pred {
   MultiPred(exprs, [ String alias ]) :
     super(alias),
     this.exprs = makeExprs(exprs).toList();
+
+  addColumns(Set<Column> out) =>
+    exprs.forEach((e) => e.addColumns(out));
 
   // end <class MultiPred>
 }
@@ -357,33 +385,87 @@ class Times extends BinaryExpr {
 }
 
 class Join {
-  Table table;
-  JoinType joinType;
-  Expr joinExpr;
+  const Join(this.table, this.joinExpr, this.joinType);
+
+  final Table table;
+  final Expr joinExpr;
+  final JoinType joinType;
   // custom <class Join>
+
+  toString() => '$joinType join ${table.name} on ${joinExpr}';
+
   // end <class Join>
 }
 
 class Query {
-  List<Expr> returns = [];
-  bool distinct = false;
-  Pred filter;
-  bool imputeJoins = true;
+  final List<Expr> returns;
+  /// Table to be queried and joined against
+  final Table table;
   List<Join> get joins => _joins;
+  final bool imputeJoins;
+  final Pred filter;
+  final bool distinct;
+  /// Tables hit by the query - determined by all columns hit by [returns] and [joins]
   List<Table> get tables => _tables;
   // custom <class Query>
 
-  Query(this.returns) {
-    Set tables = new Set();
-    returns
-      .where((r) => r is Col)
-      .forEach((r) => tables.add(r.column.table));
-    _tables = new List.from(tables);
+  Query._all(this.returns, this.table, this._joins, this.imputeJoins, this.filter,
+    this.distinct, this._tables);
+
+  factory Query(List columnsOrExprs,
+      {
+        Table table : null,
+        List<Joins> joins : null,
+        bool imputeJoins : true,
+        Pred filter : null,
+        bool distinct : false
+      }) {
+    final columns = new Set<Column>();
+    final exprs = makeExprs(columnsOrExprs).toList();
+    exprs.forEach((expr) => expr.addColumns(columns));
+    filter.addColumns(columns);
+    final tables = new Set.from(columns.map((c) => c.table));
+
+    if(tables.isEmpty)
+      throw "Queries must resolve to at least one table";
+
+    if(imputeJoins) {
+      final ordered = tables.first.schema.tables;
+      final imputedJoins = _imputeJoins(tables);
+      // order the joins so tables being referred to come first
+      // Note b <=> a, to reverse natural order of tables for this op
+      imputedJoins.sort((a,b) =>
+          ordered.indexOf(b.table).compareTo(
+            ordered.indexOf(a.table)));
+
+      joins = joins == null?
+        imputedJoins : (joins..addAll(imputedJoins));
+    }
+
+    return new Query._all(exprs, table, joins, imputeJoins, filter,
+        distinct, tables.toList());
+  }
+
+  static List<Join> _imputeJoins(Set<Table> tables) {
+    final joins = [];
+    for(var table in tables) {
+      table.foreignKeys.forEach((String fkeyName, ForeignKey fkey) {
+        if(tables.contains(fkey.refTable)) {
+          int end = fkey.columns.length;
+          for(int i=0; i<end; i++) {
+            final c1 = fkey.columns[i];
+            final c2 = fkey.refColumns[i];
+            joins.add(join(fkey.refTable, eq(c1, c2)));
+          }
+        }
+      });
+    }
+    return joins;
   }
 
   // end <class Query>
-  List<Join> _joins = [];
-  List<Table> _tables = [];
+  final List<Join> _joins;
+  final List<Table> _tables;
 }
 // custom <part query>
 
@@ -413,5 +495,12 @@ abs(expr, [alias]) => new Abs(expr, alias);
 plus(a, b, [alias]) => new Plus(a, b, alias);
 minus(a, b, [alias]) => new Minus(a, b, alias);
 times(a, b, [alias]) => new Times(a, b, alias);
+
+join(Table table, Expr joinExpr, [ JoinType joinType = INNER ]) =>
+  new Join(table, joinExpr, joinType);
+
+_orderItems(Iterable ordering, Set subset) =>
+  ordering.where((e) => subset.contains(e));
+
 
 // end <part query>

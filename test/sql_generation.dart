@@ -30,14 +30,13 @@ main() {
       final Table ru = schema._rusage_delta;
 
       // Create the query - this function takes Iterable<Expr>
-      final Query q = query(
+      final q = new Query(
         [
           cl._id, cl._label, cl._file_name, cp._id,
           ru._id, abs(ru._cpu_mhz, 'MHZ'), new Col(cp._id, 'CpId'),
           times(ru._cpu_mhz, ru._cpu_mhz, 'MHZ_SQRD')
-        ]
-        ..addAll(cp.getColumns(['name', 'descr'])))
-        ..filter = ands(
+        ]..addAll(cp.getColumns(['name', 'descr'])),
+        filter : ands(
           [
             ne(cl._label, cl._file_name),
             ne(cl._label, 'goo'),
@@ -45,7 +44,7 @@ main() {
             not(ge(abs(cl._line_number), 1<<25)),
             notNull(cl._git_commit),
             and(le(ru._cpu_mhz, 1.3e30), ge(ru._cpu_mhz, 2e2))
-          ]);
+          ]));
 
       print(engine.queryVisitor.select(q));
     });

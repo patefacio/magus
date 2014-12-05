@@ -126,7 +126,10 @@ class Schema {
       }
     });
 
-    _orderTablesByRelations(deps);
+    // tables with no fkey reference to them can be viewed as root nodes in the
+    // graph of tables. This is used to order the tables appropriately
+    _orderTablesByRelations(
+      tables.where((t) => !deps.containsKey(t)));
 
     // end <Schema>
   }
@@ -167,10 +170,10 @@ class Schema {
   }
 
   // It is useful to be able to iterate over tables in an order allowing table
-  // deletion/construction. This function finds all tables with no dependencies
-  // on it, walks their dependencies dfs to get ordering. Reassigns list of
-  // table with that ordering
-  _orderTablesByRelations(Map<Table, int> deps) {
+  // deletion/construction. This function takes all rootTables (i.e. tables with
+  // no fkey dependencies on them) and walks their dependencies dfs to get
+  // ordering. Reassigns list of table with that ordering
+  _orderTablesByRelations(Iterable<Table> rootTables) {
 
     var ordered = new LinkedHashSet<Table>.identity();
     addToOrdered(Table table) {
@@ -181,9 +184,7 @@ class Schema {
       ordered.add(table);
     };
 
-    tables
-      .where((t) => !deps.containsKey(t))
-      .forEach((t) => addToOrdered(t));
+    rootTables.forEach((t) => addToOrdered(t));
 
     assert(_dfsFkeyPaths.length == tables.length);
     assert(ordered.length == tables.length);
@@ -522,6 +523,9 @@ class Column {
   final bool autoIncrement;
   Table get table => _table;
   // custom <class Column>
+
+  get qualifiedName => '${_table.name}.$name';
+
   // end <class Column>
 
   toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';

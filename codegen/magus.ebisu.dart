@@ -145,6 +145,8 @@ void main() {
         part('query')
         ..enums = [
           enum_('join_type')
+          ..libraryScopedValues = true
+          ..isSnakeString = true
           ..jsonSupport = true
           ..values = [
             id('inner'), id('left'), id('right'), id('full'),
@@ -153,6 +155,7 @@ void main() {
         ..classes = [
           class_('expr')
           ..doc = 'SQL Expression'
+          ..isAbstract = true
           ..members = [
             member('alias')..ctorsOpt = [''],
           ],
@@ -233,20 +236,26 @@ void main() {
           class_('times')
           ..extend = 'BinaryExpr',
           class_('join')
+          ..immutable = true
           ..members = [
             member('table')..type = 'Table',
-            member('join_type')..type = 'JoinType',
             member('join_expr')..type = 'Expr',
+            member('join_type')..type = 'JoinType',
           ],
           class_('query')
-          ..members = [
-            member('returns')..type = 'List<Expr>'..classInit = [],
-            member('distinct')..classInit = false,
+          ..members = ([
+            member('returns')..type = 'List<Expr>',
+            member('table')
+            ..doc = 'Table to be queried and joined against'
+            ..type = 'Table',
+            member('joins')..type = 'List<Join>'..access = RO,
+            member('impute_joins')..type = 'bool',
             member('filter')..type = 'Pred',
-            member('impute_joins')..classInit = true,
-            member('joins')..type = 'List<Join>'..classInit = []..access = RO,
-            member('tables')..type = 'List<Table>'..classInit = []..access = RO,
-          ]
+            member('distinct')..type = 'bool',
+            member('tables')
+            ..doc = 'Tables hit by the query - determined by all columns hit by [returns] and [joins]'
+            ..type = 'List<Table>'..access = RO,
+          ]..map((m) => m.isFinal = true).toList()),
         ]
       ]
       ..classes = [

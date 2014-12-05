@@ -54,12 +54,11 @@ class SqlVisitor
   String dropTable(Table table) =>
     'Generic drop single table ${table.name}';
 
-
   String select(Query query) => '''
 select
   ${_returns(query).join(',\n  ')}
 from
-  ${query.tables.map((t) => t.name).join(',\n  ')}
+  ${_fromJoinClauses(query)}
 ${_filter(query)}
 ''';
 
@@ -68,6 +67,16 @@ ${_filter(query)}
     return filter == null?
       '' : 'where\n  ${filter.toString().replaceAll("\n", "\n  ")}';
   }
+
+  String _fromJoinClauses(Query query) {
+    final tablesInJoins = new Set<Table>.from(query.joins.map((j) => j.table));
+    List clauses = [];
+    final tablesNotInJoins = query.tables.where((t) => !tablesInJoins.contains(t));
+    clauses.add(tablesNotInJoins.map((t) => t.name).join(',\n  '));
+    clauses.add(query.joins.map((j) => j.toString()).join('\n  '));
+    return clauses.join('\n  ');
+  }
+
 
   _returns(Query query) =>
     query.returns.map((e) => e.aliased);
