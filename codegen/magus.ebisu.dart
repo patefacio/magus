@@ -244,9 +244,9 @@ void main() {
           ],
           class_('query')
           ..doc = '''
-Build a query by specifying returns, joins, and a filter (i.e. where
-clause). The query builder will find all tables referenced by the returns and
-filter expressions in order to collect all tables that need to be
+Build a query by specifying returns, joins [optionally], and a filter
+(i.e. where clause). The query builder will find all tables referenced by the
+returns and filter expressions in order to collect all tables that need to be
 specified. Joins can be imputed for normal foreign key relationships by
 traversing all fkey relationships on the tables referenced by the query. Joins
 are imputed with equality expressions linking the two tables.
@@ -264,8 +264,12 @@ are imputed with equality expressions linking the two tables.
         ]
       ]
       ..classes = [
-        class_('schema_writer')..isAbstract = true,
-        class_('schema_reader')..isAbstract = true,
+        class_('schema_writer')
+        ..members = [ member('engine')..access = RO..type = 'Engine'..ctors = [''] ]
+        ..isAbstract = true,
+        class_('schema_reader')
+        ..members = [ member('engine')..access = RO..type = 'Engine'..ctors = [''] ]
+        ..isAbstract = true,
         class_('fkey_path_entry')
         ..doc = 'For a depth first search of related tables, this is one entry'
         ..jsonToString = jsonToString
@@ -280,6 +284,7 @@ are imputed with equality expressions linking the two tables.
         ..ctorCustoms = ['']
         ..jsonToString = jsonToString
         ..members = ([
+          member('engine')..type = 'Engine',
           member('name'),
           member('tables')..type = 'List<Table>',
         ]
@@ -378,7 +383,7 @@ are imputed with equality expressions linking the two tables.
         ..classes = [
           class_('mysql_schema_writer')
           ..immutable = true
-          ..implement = [ 'SchemaWriter' ]
+          ..extend = 'SchemaWriter'
           ..members = [
             member('connection_pool')..type = 'ConnectionPool'..access = IA
           ],
@@ -401,10 +406,9 @@ are imputed with equality expressions linking the two tables.
             member('columns')..type = 'List<String>',
           ],
           class_('mysql_schema_reader')
-          ..immutable = true
-          ..implement = [ 'SchemaReader' ]
+          ..extend = 'SchemaReader'
           ..members = [
-            member('connection_pool')..type = 'ConnectionPool'..access = IA
+            member('connection_pool')..type = 'ConnectionPool'..access = IA..isFinal = true
           ],
         ]
       ],

@@ -7,8 +7,8 @@ class MysqlEngine
   MysqlEngine(this._connectionPool) :
     _visitor = new MysqlVisitor();
 
-  SchemaWriter createSchemaWriter() => new MysqlSchemaWriter(_connectionPool);
-  SchemaReader createSchemaReader() => new MysqlSchemaReader(_connectionPool);
+  SchemaWriter createSchemaWriter() => new MysqlSchemaWriter(this, _connectionPool);
+  SchemaReader createSchemaReader() => new MysqlSchemaReader(this, _connectionPool);
 
   SchemaVisitor get schemaVisitor => _visitor;
   TableVisitor get tableVisitor => _visitor;

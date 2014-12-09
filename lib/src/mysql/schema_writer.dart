@@ -1,7 +1,6 @@
 part of magus.mysql;
 
-class MysqlSchemaWriter
-  implements SchemaWriter {
+class MysqlSchemaWriter extends SchemaWriter {
   const MysqlSchemaWriter(this._connectionPool);
 
   // custom <class MysqlSchemaWriter>

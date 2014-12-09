@@ -74,15 +74,14 @@ class PrimaryKeySpec {
 
 }
 
-class MysqlSchemaReader
-  implements SchemaReader {
-  const MysqlSchemaReader(this._connectionPool);
-
+class MysqlSchemaReader extends SchemaReader {
   // custom <class MysqlSchemaReader>
+
+  MysqlSchemaReader(Engine engine, this._connectionPool) : super(engine);
 
   Future<Schema> readSchema(String schemaName) async {
     final tableCreates = await _readTableCreateStatements(schemaName);
-    return _makeSchema(schemaName, tableCreates);
+    return _makeSchema(engine, schemaName, tableCreates);
   }
 
   _readTableCreateStatements(String schemaName) async {
@@ -104,7 +103,8 @@ class MysqlSchemaReader
   }
 
   static var _commaNl = new RegExp(r',?\n');
-  static Future<Schema> _makeSchema(String schemaName, Map tableCreates) async {
+  static Future<Schema>
+    _makeSchema(Engine engine, String schemaName, Map tableCreates) async {
     final tables = [];
     tableCreates.forEach((String tableName, String create) {
       // Output of create table puts one entry (column, primary key, unqique
@@ -154,7 +154,7 @@ class MysqlSchemaReader
       tables.add(new Table(tableName, columns, pkeyColumns,
               uniqueKeys, foreignKeySpecs));
     });
-    return new Schema(schemaName, tables);
+    return new Schema(engine, schemaName, tables);
   }
 
   static var _whitespaceRe = new RegExp(r'\s+');

@@ -15,19 +15,27 @@ part 'src/schema/dialect.dart';
 part 'src/schema/query.dart';
 
 abstract class SchemaWriter {
+  SchemaWriter(this._engine);
+
+  Engine get engine => _engine;
   // custom <class SchemaWriter>
 
   writeSchema(Schema schema);
 
   // end <class SchemaWriter>
+  Engine _engine;
 }
 
 abstract class SchemaReader {
+  SchemaReader(this._engine);
+
+  Engine get engine => _engine;
   // custom <class SchemaReader>
 
   Future<Schema> readSchema(String schemaName);
 
   // end <class SchemaReader>
+  Engine _engine;
 }
 
 /// For a depth first search of related tables, this is one entry
@@ -82,7 +90,7 @@ class FkeyPathEntry {
 }
 
 class Schema {
-  Schema(this.name, this.tables) {
+  Schema(this.engine, this.name, this.tables) {
     // custom <Schema>
 
     _tableMap = tables.fold({}, (prev, t) => prev..[t.name] = t);
@@ -136,6 +144,7 @@ class Schema {
 
   Schema._default();
 
+  final Engine engine;
   final String name;
   final List<Table> tables;
   // custom <class Schema>
@@ -198,6 +207,7 @@ class Schema {
 
 
   Map toJson() => {
+      "engine": ebisu_utils.toJson(engine),
       "name": ebisu_utils.toJson(name),
       "tables": ebisu_utils.toJson(tables),
       "tableMap": ebisu_utils.toJson(_tableMap),
@@ -215,6 +225,7 @@ class Schema {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
+    engine = Engine.fromJson(jsonMap["engine"]);
     name = jsonMap["name"];
     // tables is List<Table>
     tables = ebisu_utils

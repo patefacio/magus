@@ -397,9 +397,9 @@ class Join {
   // end <class Join>
 }
 
-/// Build a query by specifying returns, joins, and a filter (i.e. where
-/// clause). The query builder will find all tables referenced by the returns and
-/// filter expressions in order to collect all tables that need to be
+/// Build a query by specifying returns, joins [optionally], and a filter
+/// (i.e. where clause). The query builder will find all tables referenced by the
+/// returns and filter expressions in order to collect all tables that need to be
 /// specified. Joins can be imputed for normal foreign key relationships by
 /// traversing all fkey relationships on the tables referenced by the query. Joins
 /// are imputed with equality expressions linking the two tables.
@@ -427,7 +427,9 @@ class Query {
     final columns = new Set<Column>();
     final exprs = makeExprs(columnsOrExprs).toList();
     exprs.forEach((expr) => expr.addColumns(columns));
-    filter.addColumns(columns);
+    if(filter != null) {
+      filter.addColumns(columns);
+    }
     final tables = new Set.from(columns.map((c) => c.table));
 
     if(tables.isEmpty)
@@ -485,6 +487,7 @@ makeExprs(Iterable<dynamic> exprs) =>
 query(Iterable<dynamic> exprs) =>
   new Query(makeExprs(exprs).toList());
 
+col(Column e, [alias]) => new Col(e, alias);
 and(a, b, [alias]) => new And(a, b, alias);
 ands(Iterable exprs, [alias]) => new MultiAnd(exprs, alias);
 or(a, b, [alias]) => new Or(a, b, alias);
