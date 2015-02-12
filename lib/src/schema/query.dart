@@ -56,6 +56,7 @@ const LEFT = JoinType.LEFT;
 const RIGHT = JoinType.RIGHT;
 const FULL = JoinType.FULL;
 
+
 /// SQL Expression
 abstract class Expr {
   Expr([ this.alias ]);

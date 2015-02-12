@@ -6,20 +6,24 @@ dependencies:
 # custom <magus dependencies>
 
   ini: ">=1.0.0"
-  sqljocky: "any"
-  ebisu:
-   git: git://github.com/patefacio/ebisu
+  sqljocky: ">=0.11.0<0.12.0"
+  ebisu: ">=0.0.12<0.0.13"
 
 # end <magus dependencies>
 
 dev_dependencies:
-  unittest: ">=0.11.0"
+  yaml: "any"
+  unittest: ">=0.11.0 < 0.12.0"
   browser: "any"
-  hop: ">=0.31.0"
-  hop_docgen: ">=0.1.0 <0.2.0"
+  hop: "any"
+  hop_docgen: "any"
 
 # custom <magus dev dependencies>
 # end <magus dev dependencies>
+
+dependency_overrides:
+# custom <magus dependency overrides>
+# end <magus dependency overrides>
 
 transformers:
 
