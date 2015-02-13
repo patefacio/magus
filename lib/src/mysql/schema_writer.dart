@@ -1,9 +1,12 @@
 part of magus.mysql;
 
 class MysqlSchemaWriter extends SchemaWriter {
-  const MysqlSchemaWriter(this._connectionPool);
 
   // custom <class MysqlSchemaWriter>
+  
+  MysqlSchemaWriter(Engine engine, this._connectionPool) : super(engine);
+  writeSchema(Schema schema) => throw 'TODO';
+  
   // end <class MysqlSchemaWriter>
   final ConnectionPool _connectionPool;
 }
