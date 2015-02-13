@@ -15,6 +15,7 @@ void main() {
   System ebisu = system('magus')
     ..doc = descr
     ..pubSpec.doc = descr
+    ..pubSpec.homepage = 'https://github.com/patefacio/magus'
     ..license = 'boost'
     ..includeHop = true
     ..rootPath = '$_topDir'
@@ -26,6 +27,9 @@ void main() {
     ..libraries = [
 
       library('odbc_ini')
+      ..doc = '''
+Support for parsing odbc ini files to retrieve DSN
+'''
       ..imports = [
         'dart:io',
         'package:sqljocky/sqljocky.dart',
@@ -34,11 +38,13 @@ void main() {
       ]
       ..classes = [
         class_('odbc_ini')
+        ..doc = 'Contains entries *of interest* per datasource parsed from an odbc ini file'
         ..defaultMemberAccess = RO
         ..members = [
           member('entries')..type = 'Map<String, OdbcIniEntry>'..classInit = {}
         ],
         class_('odbc_ini_entry')
+        ..doc = 'odbc.ini entries for a given DSN that are *of interest* enabling connection'
         ..defaultMemberAccess = RO
         ..members = [
           member('user')..ctors = [''],
@@ -57,7 +63,9 @@ void main() {
       ..parts = [
         part('sql_type')
         ..classes = [
-          class_('sql_type')..isAbstract = true,
+          class_('sql_type')
+          ..doc = 'Establishes interface for support sql datatypes'
+          ..isAbstract = true,
 
           class_('type_extension_mixin')
           ..implement = [ 'SqlType' ]
@@ -137,6 +145,9 @@ void main() {
           class_('engine')..isAbstract = true,
         ],
         part('dialect')
+        ..doc = '''
+Library of interfaces allowing decoupling of specific database implmentation
+from functional requirements'''
         ..classes = [
           class_('schema_visitor')..isAbstract = true,
           class_('table_visitor')..isAbstract = true,
@@ -147,6 +158,7 @@ void main() {
           ],
         ],
         part('query')
+        ..doc = 'Metadata required for a database query'
         ..enums = [
           enum_('join_type')
           ..libraryScopedValues = true
@@ -164,18 +176,22 @@ void main() {
             member('alias')..ctorsOpt = [''],
           ],
           class_('col')
+          ..doc = 'A single database column expression'
           ..extend = 'Expr'
           ..members = [
             member('column')..type = 'Column'..access = RO..isFinal = true,
           ],
           class_('literal')
+          ..doc = 'A literal expression, as in SQL integer, float, string'
           ..extend = 'Expr'
           ..members = [
             member('value')..type = 'dynamic'..access = RO,
           ],
           class_('pred')
+          ..doc = 'A predicate expression - i.e. an expression that returns true or false'
           ..extend = 'Expr',
           class_('unary_expr')
+          ..doc = 'A unary expression'
           ..extend = 'Expr'
           ..members = [
             member('expr')..type = 'Expr',
@@ -386,7 +402,6 @@ are imputed with equality expressions linking the two tables.
         part('schema_writer')
         ..classes = [
           class_('mysql_schema_writer')
-          ..immutable = true
           ..extend = 'SchemaWriter'
           ..members = [
             member('connection_pool')..type = 'ConnectionPool'..access = IA

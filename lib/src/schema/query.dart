@@ -74,6 +74,7 @@ abstract class Expr {
   // end <class Expr>
 }
 
+/// A single database column expression
 class Col extends Expr {
   Column get column => _column;
   // custom <class Col>
@@ -89,6 +90,7 @@ class Col extends Expr {
   final Column _column;
 }
 
+/// A literal expression, as in SQL integer, float, string
 class Literal extends Expr {
   dynamic get value => _value;
   // custom <class Literal>
@@ -104,12 +106,14 @@ class Literal extends Expr {
   dynamic _value;
 }
 
+/// A predicate expression - i.e. an expression that returns true or false
 class Pred extends Expr {
   // custom <class Pred>
   Pred([ String alias ]) : super(alias);
   // end <class Pred>
 }
 
+/// A unary expression
 class UnaryExpr extends Expr {
   Expr expr;
   // custom <class UnaryExpr>

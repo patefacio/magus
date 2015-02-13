@@ -1,5 +1,6 @@
 part of magus.schema;
 
+/// Establishes interface for support sql datatypes
 abstract class SqlType {
   // custom <class SqlType>
 
