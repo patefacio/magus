@@ -1,3 +1,5 @@
+/// Support for parsing odbc ini files to retrieve DSN
+///
 library magus.odbc_ini;
 
 import 'dart:io';
@@ -7,6 +9,7 @@ import 'package:sqljocky/sqljocky.dart';
 // custom <additional imports>
 // end <additional imports>
 
+/// Contains entries *of interest* per datasource parsed from an odbc ini file
 class OdbcIni {
   Map<String, OdbcIniEntry> get entries => _entries;
   // custom <class OdbcIni>
@@ -75,6 +78,7 @@ ${_entries[section]}''').join('\n');
   Map<String, OdbcIniEntry> _entries = {};
 }
 
+/// odbc.ini entries for a given DSN that are *of interest* enabling connection
 class OdbcIniEntry {
   OdbcIniEntry(this._user, this._password, this._database);
 
