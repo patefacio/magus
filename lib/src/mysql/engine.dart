@@ -32,6 +32,9 @@ class MysqlVisitor extends SqlVisitor {
     'Mysql create single table ${table.name}';
   String dropTable(Table table) =>
     'Mysql drop single table ${table.name}';
+    
+  String evalExpr(Expr expr) => throw "TODO";
+  String recreateSchema(Schema schema) => throw "TODO";
 
   _returns(Query query) =>
     query.returns.map((e) => evalExpr(e));
