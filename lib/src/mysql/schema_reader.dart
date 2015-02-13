@@ -74,91 +74,72 @@ class PrimaryKeySpec {
 
 }
 
-class MysqlSchemaReader extends SchemaReader {
-  // custom <class MysqlSchemaReader>
+class MysqlSchemaParser {
+  // custom <class MysqlSchemaParser>
 
-  MysqlSchemaReader(Engine engine, this._connectionPool) : super(engine);
+  /// Given a single Mysql DDL Table Create statement, return the metadata
+  /// equivalent
+  Table parseTableCreate(String create) {
+    // Output of create table puts one entry (column, primary key, unqique
+    // key, constraint, etc per line. Parsing splits by line first
+    PrimaryKeySpec primaryKeySpec;
+    final uniqueKeySpecs = [];
+    final foreignKeySpecs = [];
+    final entries = create.split(_commaNl).map((s) => s.trim()).toList();
+    assert(entries.first.contains('CREATE TABLE'));
+    assert(entries.last.contains('ENGINE'));
+    final tableName = _idRe.firstMatch(entries.first).group(1);
 
-  Future<Schema> readSchema(String schemaName) async {
-    final tableCreates = await _readTableCreateStatements(schemaName);
-    return _makeSchema(engine, schemaName, tableCreates);
-  }
+    final columns = [];
+    entries.sublist(1, entries.length-1).forEach((String entry) {
+      if(entry[0] == '`') {
+        final column = _makeColumn(entry);
+        columns.add(column);
+      } else if(entry.contains('FOREIGN KEY')) {
+        foreignKeySpecs.add(_makeForeignKeySpec(entry));
+      } else if(entry.contains('PRIMARY KEY')) {
+        primaryKeySpec = _makePrimaryKeySpec(entry);
+      } else if(entry.contains('UNIQUE KEY')) {
+        uniqueKeySpecs.add(_makeUniqueKeySpec(entry));
+      } else {
+        //print("UNKONWN $tableName => $entry");
+      }
 
-  _readTableCreateStatements(String schemaName) async {
-    final tableCreates = {};
-    return _connectionPool
-    .query('show tables')
-    .then((var tableNames) => tableNames.map((t) => t[0]).toList())
-    .then((var tableNames) => tableNames
-        .map((var tableName) =>
-            _connectionPool
-            .query('show create table $tableName')
-            .then((_) => _.toList())
-            .then((var row) => tableCreates[tableName] = row[0][1])))
-    .then((futures) => Future.wait(futures))
-    .then((var _) {
-      _connectionPool.close();
-      return tableCreates;
     });
-  }
+    assert(columns.length>0);
 
-  static var _commaNl = new RegExp(r',?\n');
-  static Future<Schema>
-    _makeSchema(Engine engine, String schemaName, Map tableCreates) async {
-    final tables = [];
-    tableCreates.forEach((String tableName, String create) {
-      // Output of create table puts one entry (column, primary key, unqique
-      // key, constraint, etc per line. Parsing splits by line first
-      PrimaryKeySpec primaryKeySpec;
-      final uniqueKeySpecs = [];
-      final foreignKeySpecs = [];
-      final entries = create.split(_commaNl).map((s) => s.trim()).toList();
-      assert(entries.first.contains('CREATE TABLE'));
-      assert(entries.last.contains('ENGINE'));
-      final columns = [];
-      entries.sublist(1, entries.length-1).forEach((String entry) {
+    List pkeyColumns =
+      primaryKeySpec
+      .columns
+      .map((colName) => columns.firstWhere((column) => colName == column.name))
+      .toList();
 
-        if(entry[0] == '`') {
-          final column = _makeColumn(entry);
-          columns.add(column);
-        } else if(entry.contains('FOREIGN KEY')) {
-          foreignKeySpecs.add(_makeForeignKeySpec(entry));
-        } else if(entry.contains('PRIMARY KEY')) {
-          primaryKeySpec = _makePrimaryKeySpec(entry);
-        } else if(entry.contains('UNIQUE KEY')) {
-          uniqueKeySpecs.add(_makeUniqueKeySpec(entry));
-        } else {
-          //print("UNKONWN $tableName => $entry");
-        }
-
-      });
-      assert(columns.length>0);
-
-      List pkeyColumns =
-        primaryKeySpec
-        .columns
-        .map((colName) => columns.firstWhere((column) => colName == column.name))
-        .toList();
-
-      List uniqueKeys =
-        uniqueKeySpecs
-        .map((UniqueKeySpec spec) =>
-            new UniqueKey(spec.name,
+    List uniqueKeys =
+      uniqueKeySpecs
+      .map((UniqueKeySpec spec) =>
+          new UniqueKey(spec.name,
               spec
               .columns
               .map((colName) => columns
                   .firstWhere((column) => colName == column.name))
               .toList()))
-        .toList();
+      .toList();
 
-      tables.add(new Table(tableName, columns, pkeyColumns,
-              uniqueKeys, foreignKeySpecs));
-    });
-    return new Schema(engine, schemaName, tables);
+    return new Table(tableName, columns, pkeyColumns,
+        uniqueKeys, foreignKeySpecs);
   }
 
+  /// Given a mapping of table name to table DDL, parses the DDL and creates the
+  /// corresponding [Table] instance
+  List<Table> parseTables(Map<String, String> createsMap) =>
+    createsMap.keys.map((String tableName) =>
+        parseTableCreate(createsMap[tableName]))
+    .toList();
+
+  static var _commaNl = new RegExp(r',?\n');
   static var _whitespaceRe = new RegExp(r'\s+');
   static var _idRe = new RegExp(r'`(.+)`');
+
   static Column _makeColumn(String columnSpec) {
     columnSpec = columnSpec
       .replaceFirst('NOT NULL', 'NOT_NULL')
@@ -297,6 +278,38 @@ class MysqlSchemaReader extends SchemaReader {
     return new PrimaryKeySpec(colTerms.map((id) => _pullId(id)).toList());
   }
 
+
+  // end <class MysqlSchemaParser>
+}
+
+class MysqlSchemaReader extends SchemaReader {
+  // custom <class MysqlSchemaReader>
+
+  MysqlSchemaReader(Engine engine, this._connectionPool) : super(engine);
+
+  Future<Map<String, String>> tableCreateStatements(String schemaName) async {
+    final tableCreates = {};
+    return _connectionPool
+    .query('show tables')
+    .then((var tableNames) => tableNames.map((t) => t[0]).toList())
+    .then((var tableNames) => tableNames
+        .map((var tableName) =>
+            _connectionPool
+            .query('show create table $tableName')
+            .then((_) => _.toList())
+            .then((var row) => tableCreates[tableName] = row[0][1])))
+    .then((futures) => Future.wait(futures))
+    .then((var _) {
+      _connectionPool.close();
+      return tableCreates;
+    });
+  }
+
+  Future<Schema> readSchema(String schemaName) async {
+    final tableCreates = await tableCreateStatements(schemaName);
+    final tables = new MysqlSchemaParser().parseTables(tableCreates);
+    return new Schema(engine, schemaName, tables);
+  }
 
   // end <class MysqlSchemaReader>
   final ConnectionPool _connectionPool;

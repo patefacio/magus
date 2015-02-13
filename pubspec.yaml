@@ -1,11 +1,13 @@
 name: magus
 version: 0.0.1
 author: Daniel Davidson <dbdavidson@yahoo.com>
+description: >
+  Package for reading schema and making metadata available
 dependencies:
 
 # custom <magus dependencies>
 
-  ini: ">=1.0.0"
+  ini: ">=1.0.0<2.0.0"
   sqljocky: ">=0.11.0<0.12.0"
   ebisu: ">=0.0.12<0.0.13"
 

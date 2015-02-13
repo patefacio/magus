@@ -1,7 +1,7 @@
 import sys
 import argparse
 import getopt
-sys.path.insert(0, '/Users/dbdavidson/dev/open_source/sqlalchemy/lib')
+sys.path.insert(0, '~/dev/open_source/sqlalchemy/lib')
 from sqlalchemy import *
 from sqlalchemy.dialects.mysql import \
         BIGINT, BINARY, BIT, BLOB, BOOLEAN, CHAR, DATE, \
@@ -21,8 +21,13 @@ def main():
         print(err)
         sys.exit()
 
-    engine = create_engine('mysql://%s:%s@localhost/code_metrics'%(args.user, args.password),
+    engine = create_engine('mysql://%s:%s@localhost'%(args.user, args.password),
                            echo="debug")
+
+    engine.execute("DROP DATABASE IF EXISTS magus")    
+    engine.execute("CREATE DATABASE magus")
+    engine.execute("USE magus")
+    engine.execute("GRANT ALL ON magus.* TO 'magus'@'localhost' IDENTIFIED BY 'maguspwd'");
     insp = inspect(engine)
     print insp
 

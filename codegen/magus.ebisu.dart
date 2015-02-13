@@ -11,13 +11,17 @@ void main() {
   String here = path.absolute(Platform.script.path);
   _topDir = path.dirname(path.dirname(here));
   bool jsonToString = true;
+  final descr = 'Package for reading schema and making metadata available';
   System ebisu = system('magus')
-    ..doc = 'Database schema retrieval'
+    ..doc = descr
+    ..pubSpec.doc = descr
+    ..license = 'boost'
     ..includeHop = true
     ..rootPath = '$_topDir'
     ..testLibraries = [
       library('schema_reading'),
       library('sql_generation'),
+      library('mysql_table_parse'),
     ]
     ..libraries = [
 
@@ -405,6 +409,7 @@ are imputed with equality expressions linking the two tables.
           ..members = [
             member('columns')..type = 'List<String>',
           ],
+          class_('mysql_schema_parser'),
           class_('mysql_schema_reader')
           ..extend = 'SchemaReader'
           ..members = [
