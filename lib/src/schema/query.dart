@@ -191,7 +191,7 @@ class IsNull extends UnaryPred {
   // custom <class IsNull>
 
   IsNull(expr, [String alias]) :
-    super(makeExpr(expr), alias),
+    super(makeExpr(expr), alias);
 
   toString() => '$expr IS NULL';
 
