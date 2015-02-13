@@ -21,7 +21,7 @@ void main() {
     ..testLibraries = [
       library('schema_reading'),
       library('sql_generation'),
-      library('mysql_table_parse'),
+      library('test_mysql_table_parse'),
     ]
     ..libraries = [
 
