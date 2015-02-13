@@ -16,7 +16,7 @@ void main(List<String> args) {
   //TODO: Figure this out: addTask('docs', createDocGenTask(_getLibs));
   addTask('analyze_test',
       createAnalyzerTask([
-
+        "test/test_mysql_table_parse.dart"
       ]));
 
 
