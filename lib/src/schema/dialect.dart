@@ -53,6 +53,9 @@ class SqlVisitor
     'Generic create single table ${table.name}';
   String dropTable(Table table) =>
     'Generic drop single table ${table.name}';
+    
+  String evalExpr(Expr expr) => throw "TBD";
+  String recreateSchema(Schema schema) => throw "TBD";
 
   String select(Query query) => '''
 select

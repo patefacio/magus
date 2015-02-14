@@ -58,6 +58,11 @@ const FULL = JoinType.FULL;
 
 
 /// SQL Expression
+///
+/// The reqult of a query is essentially a collection of expressions comprising the
+/// return fields. This provides such an interface.
+///
+///
 abstract class Expr {
   Expr([ this.alias ]);
 
@@ -69,6 +74,9 @@ abstract class Expr {
   get aliased => alias != null?
     '$this as $alias' : toString();
 
+  /// It is important to be able to determine the set of columns in any query,
+  /// so addColumns should add to [out] any columns represented by the
+  /// expression
   addColumns(Set<Column> out);
 
   // end <class Expr>
@@ -107,7 +115,7 @@ class Literal extends Expr {
 }
 
 /// A predicate expression - i.e. an expression that returns true or false
-class Pred extends Expr {
+abstract class Pred extends Expr {
   // custom <class Pred>
   Pred([ String alias ]) : super(alias);
   // end <class Pred>
@@ -424,7 +432,7 @@ class Query {
 
   factory Query(List columnsOrExprs,
       {
-        List<Joins> joins : null,
+        List<Join> joins : null,
         bool imputeJoins : true,
         Pred filter : null,
         bool distinct : false
@@ -483,7 +491,7 @@ class Query {
 makeExpr(dynamic e) =>
   e is Expr? e :
   e is Column? new Col(e) :
-  (e is double || e is int || e is String)? new Literal(e) :
+  (e is num || e is String)? new Literal(e) :
   throw '${e.runtimeType} is not convertible to Expr';
 
 makeExprs(Iterable<dynamic> exprs) =>

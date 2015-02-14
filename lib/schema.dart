@@ -14,6 +14,8 @@ part 'src/schema/engine.dart';
 part 'src/schema/dialect.dart';
 part 'src/schema/query.dart';
 
+/// Establishes an interface to write schema to a specific Engine
+/// derivative.
 abstract class SchemaWriter {
   SchemaWriter(this._engine);
 
@@ -26,6 +28,8 @@ abstract class SchemaWriter {
   Engine _engine;
 }
 
+/// Establishes an interface to read schema to a specific Engine
+/// derivative.
 abstract class SchemaReader {
   SchemaReader(this._engine);
 
@@ -40,15 +44,18 @@ abstract class SchemaReader {
 
 /// For a depth first search of related tables, this is one entry
 class FkeyPathEntry {
-  const FkeyPathEntry(this.name, this.table, this.refTable, this.foreignKeySpec);
+  FkeyPathEntry(this._name, this._table, this._refTable, this._foreignKeySpec);
+
+  FkeyPathEntry._default();
 
   /// Name of the fkey constraint linking these tables
-  final String name;
+  String get name => _name;
   /// Table doing the referring
-  final Table table;
+  Table get table => _table;
   /// Table referred to with foreign key constraint
-  final Table refTable;
-  final ForeignKeySpec foreignKeySpec;
+  Table get refTable => _refTable;
+  /// Details of the foreign key at this path
+  ForeignKeySpec get foreignKeySpec => _foreignKeySpec;
   // custom <class FkeyPathEntry>
 
   get _srcColNames => foreignKeySpec.columns;
@@ -72,23 +79,25 @@ class FkeyPathEntry {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new FkeyPathEntry._fromJsonMapImpl(json);
+    return new FkeyPathEntry._default()
+      .._fromJsonMapImpl(json);
   }
 
-  FkeyPathEntry._fromJsonMapImpl(Map jsonMap) :
-    name = jsonMap["name"],
-    table = Table.fromJson(jsonMap["table"]),
-    refTable = Table.fromJson(jsonMap["refTable"]),
-    foreignKeySpec = ForeignKeySpec.fromJson(jsonMap["foreignKeySpec"]);
-
-  FkeyPathEntry._copy(FkeyPathEntry other) :
-    name = other.name,
-    table = other.table == null? null : other.table.copy(),
-    refTable = other.refTable == null? null : other.refTable.copy(),
-    foreignKeySpec = other.foreignKeySpec == null? null : other.foreignKeySpec.copy();
-
+  void _fromJsonMapImpl(Map jsonMap) {
+    _name = jsonMap["name"];
+    _table = Table.fromJson(jsonMap["table"]);
+    _refTable = Table.fromJson(jsonMap["refTable"]);
+    _foreignKeySpec = ForeignKeySpec.fromJson(jsonMap["foreignKeySpec"]);
+  }
+  String _name;
+  Table _table;
+  Table _refTable;
+  ForeignKeySpec _foreignKeySpec;
 }
 
+/// A named database schema with the corresponding table metadata
+/// associated with a specific engine.
+///
 class Schema {
   Schema(this.engine, this.name, this.tables) {
     // custom <Schema>
@@ -246,11 +255,14 @@ class Schema {
   ;
   }
   Map<String, Table> _tableMap = {};
-  /// For each table a list of path entries comprising a depth-first-search of referred to tables
+  /// For each table a list of path entries comprising a depth-first-search
+  /// of referred to tables
   Map<String, FkeyPathEntry> _dfsFkeyPaths = {};
 }
 
-/// Spec class for a ForeignKey - indicating the relationship by naming the tables and columns
+/// Spec class for a ForeignKey - indicating the relationship by naming
+/// the tables and columns
+///
 class ForeignKeySpec {
   const ForeignKeySpec(this.name, this.refTable, this.columns, this.refColumns);
 

@@ -15,12 +15,12 @@ abstract class TypeExtensionMixin
 }
 
 class SqlString extends Object with TypeExtensionMixin {
-  SqlString(this.length, [ this.isVarying = true ]);
+  SqlString(this._length, this._isVarying);
 
   SqlString._default();
 
-  final int length;
-  final bool isVarying;
+  int get length => _length;
+  bool get isVarying => _isVarying;
   // custom <class SqlString>
 
   // end <class SqlString>
@@ -41,19 +41,21 @@ class SqlString extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    length = jsonMap["length"];
-    isVarying = jsonMap["isVarying"];
+    _length = jsonMap["length"];
+    _isVarying = jsonMap["isVarying"];
   }
+  int _length;
+  bool _isVarying;
 }
 
 class SqlInt extends Object with TypeExtensionMixin {
-  SqlInt(this.length, this.displayLength, [ this.unsigned = false ]);
+  SqlInt(this._length, this._displayLength, [ this._unsigned = false ]);
 
   SqlInt._default();
 
-  final int length;
-  final int displayLength;
-  final bool unsigned;
+  int get length => _length;
+  int get displayLength => _displayLength;
+  bool get unsigned => _unsigned;
   // custom <class SqlInt>
 
   // end <class SqlInt>
@@ -78,20 +80,23 @@ class SqlInt extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    length = jsonMap["length"];
-    displayLength = jsonMap["displayLength"];
-    unsigned = jsonMap["unsigned"];
+    _length = jsonMap["length"];
+    _displayLength = jsonMap["displayLength"];
+    _unsigned = jsonMap["unsigned"];
   }
+  int _length;
+  int _displayLength;
+  bool _unsigned;
 }
 
 class SqlDecimal extends Object with TypeExtensionMixin {
-  SqlDecimal(this.precision, this.scale, [ this.unsigned = false ]);
+  SqlDecimal(this._precision, this._scale, [ this._unsigned = false ]);
 
   SqlDecimal._default();
 
-  final int precision;
-  final int scale;
-  final bool unsigned;
+  int get precision => _precision;
+  int get scale => _scale;
+  bool get unsigned => _unsigned;
   // custom <class SqlDecimal>
   // end <class SqlDecimal>
 
@@ -115,19 +120,22 @@ class SqlDecimal extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    precision = jsonMap["precision"];
-    scale = jsonMap["scale"];
-    unsigned = jsonMap["unsigned"];
+    _precision = jsonMap["precision"];
+    _scale = jsonMap["scale"];
+    _unsigned = jsonMap["unsigned"];
   }
+  int _precision;
+  int _scale;
+  bool _unsigned;
 }
 
 class SqlBinary extends Object with TypeExtensionMixin {
-  SqlBinary(this.length, [ this.isVarying = true ]);
+  SqlBinary(this._length, [ this._isVarying = true ]);
 
   SqlBinary._default();
 
-  final int length;
-  final bool isVarying;
+  int get length => _length;
+  bool get isVarying => _isVarying;
   // custom <class SqlBinary>
   // end <class SqlBinary>
 
@@ -150,19 +158,21 @@ class SqlBinary extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    length = jsonMap["length"];
-    isVarying = jsonMap["isVarying"];
+    _length = jsonMap["length"];
+    _isVarying = jsonMap["isVarying"];
   }
+  int _length;
+  bool _isVarying;
 }
 
 class SqlFloat extends Object with TypeExtensionMixin {
-  SqlFloat(this.precision, this.scale, [ this.unsigned = false ]);
+  SqlFloat(this._precision, this._scale, [ this._unsigned = false ]);
 
   SqlFloat._default();
 
-  final int precision;
-  final int scale;
-  final bool unsigned;
+  int get precision => _precision;
+  int get scale => _scale;
+  bool get unsigned => _unsigned;
   // custom <class SqlFloat>
   // end <class SqlFloat>
 
@@ -186,10 +196,13 @@ class SqlFloat extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    precision = jsonMap["precision"];
-    scale = jsonMap["scale"];
-    unsigned = jsonMap["unsigned"];
+    _precision = jsonMap["precision"];
+    _scale = jsonMap["scale"];
+    _unsigned = jsonMap["unsigned"];
   }
+  int _precision;
+  int _scale;
+  bool _unsigned;
 }
 
 class SqlDate extends Object with TypeExtensionMixin {
@@ -203,11 +216,11 @@ class SqlDate extends Object with TypeExtensionMixin {
 }
 
 class SqlTime extends Object with TypeExtensionMixin {
-  SqlTime(this.hasTimezone);
+  SqlTime(this._hasTimezone);
 
   SqlTime._default();
 
-  final bool hasTimezone;
+  bool get hasTimezone => _hasTimezone;
   // custom <class SqlTime>
   // end <class SqlTime>
 
@@ -229,17 +242,18 @@ class SqlTime extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    hasTimezone = jsonMap["hasTimezone"];
+    _hasTimezone = jsonMap["hasTimezone"];
   }
+  bool _hasTimezone;
 }
 
 class SqlTimestamp extends Object with TypeExtensionMixin {
-  SqlTimestamp(this.hasTimezone, this.autoUpdate);
+  SqlTimestamp(this._hasTimezone, this._autoUpdate);
 
   SqlTimestamp._default();
 
-  final bool hasTimezone;
-  final bool autoUpdate;
+  bool get hasTimezone => _hasTimezone;
+  bool get autoUpdate => _autoUpdate;
   // custom <class SqlTimestamp>
   // end <class SqlTimestamp>
 
@@ -262,11 +276,17 @@ class SqlTimestamp extends Object with TypeExtensionMixin {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    hasTimezone = jsonMap["hasTimezone"];
-    autoUpdate = jsonMap["autoUpdate"];
+    _hasTimezone = jsonMap["hasTimezone"];
+    _autoUpdate = jsonMap["autoUpdate"];
   }
+  bool _hasTimezone;
+  bool _autoUpdate;
 }
 
+/// Different engines may have different support/naming conventions for
+/// the DDL corresponding to a given type. This provides an interface for
+/// a specific dialect to generate proper DDL for the supported type.
+///
 abstract class SqlTypeVisitor {
   // custom <class SqlTypeVisitor>
 
@@ -276,7 +296,9 @@ abstract class SqlTypeVisitor {
       case SqlBinary: return sqlBinaryDdl(sqlType);
       case SqlInt: return sqlIntDdl(sqlType);
       case SqlFloat: return sqlFloatDdl(sqlType);
-      case SqlTemporal: return sqlTemporalDdl(sqlType);
+      case SqlDate: return sqlDateDdl(sqlType);
+      case SqlTimestamp: return sqlTimestampDdl(sqlType);
+      case SqlTime: return sqlTimeDdl(sqlType);
       default: return sqlExtensionDdl(sqlType);
     }
   }
@@ -285,8 +307,9 @@ abstract class SqlTypeVisitor {
   String sqlBinaryDdl(SqlBinary);
   String sqlIntDdl(SqlInt);
   String sqlFloatDdl(SqlFloat);
-  String sqlTemporalDdl(SqlTemporal);
-
+  String sqlDateDdl(SqlDate);
+  String sqlTimeDdl(SqlTime);
+  String sqlTimestampDdl(SqlTimestamp);
   String sqlExtensionDdl(SqlType);
 
   // end <class SqlTypeVisitor>

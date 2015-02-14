@@ -16,7 +16,7 @@ void main() {
     ..doc = descr
     ..pubSpec.doc = descr
     ..pubSpec.homepage = 'https://github.com/patefacio/magus'
-    ..pubSpec.version = '0.0.2'
+    ..pubSpec.version = '0.0.3'
     ..license = 'boost'
     ..includeHop = true
     ..rootPath = '$_topDir'
@@ -79,43 +79,43 @@ Support for parsing odbc ini files to retrieve DSN
           ..jsonSupport = true
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..type = 'int'..isFinal = true..ctors = [''],
-            member('is_varying')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'true',
+            member('length')..type = 'int'..access = RO..ctors = [''],
+            member('is_varying')..type = 'bool'..access = RO..ctors = [''],
           ],
 
           class_('sql_int')
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..type = 'int'..isFinal = true..ctors = [''],
-            member('display_length')..type = 'int'..isFinal = true..ctors = [''],
-            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false'
+            member('length')..type = 'int'..access = RO..ctors = [''],
+            member('display_length')..type = 'int'..access = RO..ctors = [''],
+            member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_decimal')
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('precision')..type = 'int'..isFinal = true..ctors = [''],
-            member('scale')..type = 'int'..isFinal = true..ctors = [''],
-            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false',
+            member('precision')..type = 'int'..access = RO..ctors = [''],
+            member('scale')..type = 'int'..access = RO..ctors = [''],
+            member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_binary')
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..type = 'int'..isFinal = true..ctors = [''],
-            member('is_varying')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'true',
+            member('length')..type = 'int'..access = RO..ctors = [''],
+            member('is_varying')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'true',
           ],
 
           class_('sql_float')
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('precision')..type = 'int'..isFinal = true..ctors = [''],
-            member('scale')..type = 'int'..isFinal = true..ctors = [''],
-            member('unsigned')..type = 'bool'..isFinal = true..ctorsOpt = ['']..ctorInit = 'false',
+            member('precision')..type = 'int'..access = RO..ctors = [''],
+            member('scale')..type = 'int'..access = RO..ctors = [''],
+            member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_date')
@@ -127,23 +127,36 @@ Support for parsing odbc ini files to retrieve DSN
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
+            member('has_timezone')..type = 'bool'..access = RO..ctors = [''],
           ],
 
           class_('sql_timestamp')
           ..jsonToString = jsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('has_timezone')..type = 'bool'..isFinal = true..ctors = [''],
-            member('auto_update')..type = 'bool'..isFinal = true..ctors = [''],
+            member('has_timezone')..type = 'bool'..access = RO..ctors = [''],
+            member('auto_update')..type = 'bool'..access = RO..ctors = [''],
           ],
 
-          class_('sql_type_visitor')..isAbstract = true,
+          class_('sql_type_visitor')
+          ..doc = '''
+Different engines may have different support/naming conventions for
+the DDL corresponding to a given type. This provides an interface for
+a specific dialect to generate proper DDL for the supported type.
+'''
+          ..isAbstract = true,
 
         ],
         part('engine')
         ..classes = [
-          class_('engine')..isAbstract = true,
+          class_('engine')
+          ..doc = '''
+An engine is what client code interacts with to read or write schema.
+
+It provides access to dialect specific visitors that can generate
+appropriate [Table], [Expr], [Query] and [Schema]
+'''
+          ..isAbstract = true,
         ],
         part('dialect')
         ..doc = '''
@@ -171,7 +184,13 @@ from functional requirements'''
         ]
         ..classes = [
           class_('expr')
-          ..doc = 'SQL Expression'
+          ..doc = '''
+SQL Expression
+
+The reqult of a query is essentially a collection of expressions comprising the
+return fields. This provides such an interface.
+
+'''
           ..isAbstract = true
           ..members = [
             member('alias')..ctorsOpt = [''],
@@ -189,6 +208,7 @@ from functional requirements'''
             member('value')..type = 'dynamic'..access = RO,
           ],
           class_('pred')
+          ..isAbstract = true
           ..doc = 'A predicate expression - i.e. an expression that returns true or false'
           ..extend = 'Expr',
           class_('unary_expr')
@@ -286,22 +306,41 @@ are imputed with equality expressions linking the two tables.
       ]
       ..classes = [
         class_('schema_writer')
+        ..doc = '''
+Establishes an interface to write schema to a specific Engine
+derivative.'''
         ..members = [ member('engine')..access = RO..type = 'Engine'..ctors = [''] ]
         ..isAbstract = true,
         class_('schema_reader')
+        ..doc = '''
+Establishes an interface to read schema to a specific Engine
+derivative.'''
         ..members = [ member('engine')..access = RO..type = 'Engine'..ctors = [''] ]
         ..isAbstract = true,
         class_('fkey_path_entry')
         ..doc = 'For a depth first search of related tables, this is one entry'
         ..jsonToString = jsonToString
-        ..immutable = true
+        //..immutable = true
         ..members = [
-          member('name')..doc = 'Name of the fkey constraint linking these tables',
-          member('table')..doc = 'Table doing the referring'..type = 'Table',
-          member('ref_table')..doc = 'Table referred to with foreign key constraint'..type = 'Table',
-          member('foreign_key_spec')..type = 'ForeignKeySpec',
+          member('name')
+          ..doc = 'Name of the fkey constraint linking these tables'
+          ..access = RO..ctors = [''],
+          member('table')
+          ..doc = 'Table doing the referring'..type = 'Table'
+          ..access = RO..ctors = [''],
+          member('ref_table')
+          ..doc = 'Table referred to with foreign key constraint'..type = 'Table'
+          ..access = RO..ctors = [''],
+          member('foreign_key_spec')
+          ..doc = 'Details of the foreign key at this path'
+          ..type = 'ForeignKeySpec'
+          ..access = RO..ctors = [''],
         ],
         class_('schema')
+        ..doc = '''
+A named database schema with the corresponding table metadata
+associated with a specific engine.
+'''
         ..ctorCustoms = ['']
         ..jsonToString = jsonToString
         ..members = ([
@@ -314,13 +353,20 @@ are imputed with equality expressions linking the two tables.
             ..isFinal = true
             ..ctors = [''])
         ..addAll([
-          member('table_map')..type = 'Map<String, Table>'..access = IA..classInit = {},
+          member('table_map')
+          ..type = 'Map<String, Table>'..access = IA..classInit = {},
           member('dfs_fkey_paths')
-          ..doc = 'For each table a list of path entries comprising a depth-first-search of referred to tables'
+          ..doc = '''
+For each table a list of path entries comprising a depth-first-search
+of referred to tables
+'''
           ..type = 'Map<String, FkeyPathEntry>'..access = IA..classInit = {},
         ])),
         class_('foreign_key_spec')
-        ..doc = 'Spec class for a ForeignKey - indicating the relationship by naming the tables and columns'
+        ..doc = '''
+Spec class for a ForeignKey - indicating the relationship by naming
+the tables and columns
+'''
         ..jsonToString = jsonToString
         ..immutable = true
         ..members = [
