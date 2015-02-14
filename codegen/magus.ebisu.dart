@@ -344,13 +344,13 @@ associated with a specific engine.
         ..ctorCustoms = ['']
         ..jsonToString = jsonToString
         ..members = ([
-          member('engine')..type = 'Engine',
+          member('engine')..type = 'Engine'..jsonTransient = true,
           member('name'),
           member('tables')..type = 'List<Table>',
         ]
         ..forEach((member) =>
             member
-            ..isFinal = true
+            ..access = RO
             ..ctors = [''])
         ..addAll([
           member('table_map')
@@ -360,7 +360,7 @@ associated with a specific engine.
 For each table a list of path entries comprising a depth-first-search
 of referred to tables
 '''
-          ..type = 'Map<String, FkeyPathEntry>'..access = IA..classInit = {},
+          ..type = 'Map<String, List<FkeyPathEntry>>'..access = IA..classInit = {},
         ])),
         class_('foreign_key_spec')
         ..doc = '''
@@ -376,13 +376,20 @@ the tables and columns
           member('ref_columns')..type = 'List<String>',
         ],
         class_('foreign_key')
-        ..immutable = true
         ..jsonToString = jsonToString
         ..members = [
-          member('name'),
-          member('columns')..type = 'List<Column>',
-          member('ref_table')..type = 'Table',
-          member('ref_columns')..type = 'List<Column>',
+          member('name')
+          ..doc = 'Name of the foreign key definition'
+          ..access = RO..ctors = [''],
+          member('columns')
+          ..doc = 'Columns present in the foreign key'
+          ..type = 'List<Column>'..access = RO..ctors = [''],
+          member('ref_table')
+          ..doc = ''
+          ..type = 'Table'..access = RO..ctors = [''],
+          member('ref_columns')
+          ..doc = ''
+          ..type = 'List<Column>'..access = RO..ctors = [''],
         ],
         class_('unique_key')
         ..jsonToString = jsonToString
@@ -396,7 +403,7 @@ the tables and columns
         ..ctorCustoms = ['']
         ..members = (
           [
-            member('name')..ctors = [''],
+            member('name'),
             member('columns')..type = 'List<Column>',
             member('primary_key')..type = 'List<Column>',
             member('unique_keys')..type = 'List<UniqueKey>',
@@ -404,7 +411,7 @@ the tables and columns
           ]
           ..forEach((member) =>
               member
-              ..isFinal = true
+              ..access = RO
               ..ctors = [''])
           ..addAll([
             member('column_map')..type = 'Map<String, Column>'..access = IA..classInit = {},
@@ -421,7 +428,7 @@ the tables and columns
             member('nullable')..type = 'bool',
             member('auto_increment')..type = 'bool',
           ]
-          ..forEach((member) => member..isFinal = true..ctors = [''])
+          ..forEach((member) => member..access = RO..ctors = [''])
           ..addAll([
             member('table')..type = 'Table'..access = RO..jsonTransient = true,
           ])),

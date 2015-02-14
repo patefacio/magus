@@ -99,7 +99,7 @@ class FkeyPathEntry {
 /// associated with a specific engine.
 ///
 class Schema {
-  Schema(this.engine, this.name, this.tables) {
+  Schema(this._engine, this._name, this._tables) {
     // custom <Schema>
 
     _tableMap = tables.fold({}, (prev, t) => prev..[t.name] = t);
@@ -120,7 +120,7 @@ class Schema {
         final path = _dfsTableVisitorImpl(table, []);
         _dfsFkeyPaths[tname] = path;
 
-        Map<String, ForeignKeys> fkeys = {};
+        Map<String, ForeignKey> fkeys = {};
         path
           .where((fpe) => fpe.table == table)
           .forEach((FkeyPathEntry fpe) {
@@ -153,9 +153,9 @@ class Schema {
 
   Schema._default();
 
-  final Engine engine;
-  final String name;
-  final List<Table> tables;
+  Engine get engine => _engine;
+  String get name => _name;
+  List<Table> get tables => _tables;
   // custom <class Schema>
 
   Table getTable(String tableName) => _tableMap[tableName];
@@ -174,9 +174,10 @@ class Schema {
     return super.noSuchMethod(invocation);
   }
 
-  List<FkeyPathEntry> getDfsPath(String tableName) => _dfsFkeyPaths[tableName];
+  List<FkeyPathEntry> getDfsPath(String tableName) =>
+    _dfsFkeyPaths[tableName];
 
-  _dfsTableVisitorImpl(Table table, List<FkeyPathEntry> entries) {
+  List<FkeyPathEntry> _dfsTableVisitorImpl(Table table, List<FkeyPathEntry> entries) {
 
     table.foreignKeySpecs.forEach((ForeignKeySpec fkey) {
       final refTable = getTable(fkey.refTable);
@@ -216,7 +217,6 @@ class Schema {
 
 
   Map toJson() => {
-      "engine": ebisu_utils.toJson(engine),
       "name": ebisu_utils.toJson(name),
       "tables": ebisu_utils.toJson(tables),
       "tableMap": ebisu_utils.toJson(_tableMap),
@@ -234,10 +234,9 @@ class Schema {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    engine = Engine.fromJson(jsonMap["engine"]);
-    name = jsonMap["name"];
+    _name = jsonMap["name"];
     // tables is List<Table>
-    tables = ebisu_utils
+    _tables = ebisu_utils
       .constructListFromJsonData(jsonMap["tables"],
                                  (data) => Table.fromJson(data))
     ;
@@ -247,17 +246,20 @@ class Schema {
         jsonMap["tableMap"],
         (value) => Table.fromJson(value))
     ;
-    // dfsFkeyPaths is Map<String, FkeyPathEntry>
+    // dfsFkeyPaths is Map<String, List<FkeyPathEntry>>
     _dfsFkeyPaths = ebisu_utils
       .constructMapFromJsonData(
         jsonMap["dfsFkeyPaths"],
-        (value) => FkeyPathEntry.fromJson(value))
+        (value) => value)
   ;
   }
+  Engine _engine;
+  String _name;
+  List<Table> _tables;
   Map<String, Table> _tableMap = {};
   /// For each table a list of path entries comprising a depth-first-search
   /// of referred to tables
-  Map<String, FkeyPathEntry> _dfsFkeyPaths = {};
+  Map<String, List<FkeyPathEntry>> _dfsFkeyPaths = {};
 }
 
 /// Spec class for a ForeignKey - indicating the relationship by naming
@@ -313,12 +315,18 @@ class ForeignKeySpec {
 }
 
 class ForeignKey {
-  const ForeignKey(this.name, this.columns, this.refTable, this.refColumns);
+  ForeignKey(this._name, this._columns, this._refTable, this._refColumns);
 
-  final String name;
-  final List<Column> columns;
-  final Table refTable;
-  final List<Column> refColumns;
+  ForeignKey._default();
+
+  /// Name of the foreign key definition
+  String get name => _name;
+  /// Columns present in the foreign key
+  List<Column> get columns => _columns;
+  /// 
+  Table get refTable => _refTable;
+  /// 
+  List<Column> get refColumns => _refColumns;
   // custom <class ForeignKey>
 
   get columnPairs => zip([ columns, refColumns ]);
@@ -341,31 +349,28 @@ class ForeignKey {
       json = convert.JSON.decode(json);
     }
     assert(json is Map);
-    return new ForeignKey._fromJsonMapImpl(json);
+    return new ForeignKey._default()
+      .._fromJsonMapImpl(json);
   }
 
-  ForeignKey._fromJsonMapImpl(Map jsonMap) :
-    name = jsonMap["name"],
+  void _fromJsonMapImpl(Map jsonMap) {
+    _name = jsonMap["name"];
     // columns is List<Column>
-    columns = ebisu_utils
+    _columns = ebisu_utils
       .constructListFromJsonData(jsonMap["columns"],
-                                 (data) => Column.fromJson(data)),
-    refTable = Table.fromJson(jsonMap["refTable"]),
+                                 (data) => Column.fromJson(data))
+    ;
+    _refTable = Table.fromJson(jsonMap["refTable"]);
     // refColumns is List<Column>
-    refColumns = ebisu_utils
+    _refColumns = ebisu_utils
       .constructListFromJsonData(jsonMap["refColumns"],
-                                 (data) => Column.fromJson(data));
-
-  ForeignKey._copy(ForeignKey other) :
-    name = other.name,
-    columns = other.columns == null? null :
-      (new List.from(other.columns.map((e) =>
-        e == null? null : e.copy()))),
-    refTable = other.refTable == null? null : other.refTable.copy(),
-    refColumns = other.refColumns == null? null :
-      (new List.from(other.refColumns.map((e) =>
-        e == null? null : e.copy())));
-
+                                 (data) => Column.fromJson(data))
+  ;
+  }
+  String _name;
+  List<Column> _columns;
+  Table _refTable;
+  List<Column> _refColumns;
 }
 
 class UniqueKey {
@@ -409,8 +414,8 @@ class UniqueKey {
 }
 
 class Table {
-  Table(this.name, this.columns, this.primaryKey, this.uniqueKeys,
-    this.foreignKeySpecs) {
+  Table(this._name, this._columns, this._primaryKey, this._uniqueKeys,
+    this._foreignKeySpecs) {
     // custom <Table>
 
     columns.forEach((Column c) {
@@ -430,11 +435,11 @@ class Table {
 
   Table._default();
 
-  final String name;
-  final List<Column> columns;
-  final List<Column> primaryKey;
-  final List<UniqueKey> uniqueKeys;
-  final List<ForeignKeySpec> foreignKeySpecs;
+  String get name => _name;
+  List<Column> get columns => _columns;
+  List<Column> get primaryKey => _primaryKey;
+  List<UniqueKey> get uniqueKeys => _uniqueKeys;
+  List<ForeignKeySpec> get foreignKeySpecs => _foreignKeySpecs;
   List<Column> get valueColumns => _valueColumns;
   Map<String, ForeignKey> get foreignKeys => _foreignKeys;
   Schema get schema => _schema;
@@ -490,24 +495,24 @@ class Table {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    name = jsonMap["name"];
+    _name = jsonMap["name"];
     // columns is List<Column>
-    columns = ebisu_utils
+    _columns = ebisu_utils
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data))
     ;
     // primaryKey is List<Column>
-    primaryKey = ebisu_utils
+    _primaryKey = ebisu_utils
       .constructListFromJsonData(jsonMap["primaryKey"],
                                  (data) => Column.fromJson(data))
     ;
     // uniqueKeys is List<UniqueKey>
-    uniqueKeys = ebisu_utils
+    _uniqueKeys = ebisu_utils
       .constructListFromJsonData(jsonMap["uniqueKeys"],
                                  (data) => UniqueKey.fromJson(data))
     ;
     // foreignKeySpecs is List<ForeignKeySpec>
-    foreignKeySpecs = ebisu_utils
+    _foreignKeySpecs = ebisu_utils
       .constructListFromJsonData(jsonMap["foreignKeySpecs"],
                                  (data) => ForeignKeySpec.fromJson(data))
     ;
@@ -529,6 +534,11 @@ class Table {
         (value) => ForeignKey.fromJson(value))
   ;
   }
+  String _name;
+  List<Column> _columns;
+  List<Column> _primaryKey;
+  List<UniqueKey> _uniqueKeys;
+  List<ForeignKeySpec> _foreignKeySpecs;
   Map<String, Column> _columnMap = {};
   List<Column> _valueColumns;
   Map<String, ForeignKey> _foreignKeys;
@@ -536,14 +546,14 @@ class Table {
 }
 
 class Column {
-  Column(this.name, this.type, this.nullable, this.autoIncrement);
+  Column(this._name, this._type, this._nullable, this._autoIncrement);
 
   Column._default();
 
-  final String name;
-  final SqlType type;
-  final bool nullable;
-  final bool autoIncrement;
+  String get name => _name;
+  SqlType get type => _type;
+  bool get nullable => _nullable;
+  bool get autoIncrement => _autoIncrement;
   Table get table => _table;
   // custom <class Column>
 
@@ -572,11 +582,15 @@ class Column {
   }
 
   void _fromJsonMapImpl(Map jsonMap) {
-    name = jsonMap["name"];
-    type = SqlType.fromJson(jsonMap["type"]);
-    nullable = jsonMap["nullable"];
-    autoIncrement = jsonMap["autoIncrement"];
+    _name = jsonMap["name"];
+    _type = SqlType.fromJson(jsonMap["type"]);
+    _nullable = jsonMap["nullable"];
+    _autoIncrement = jsonMap["autoIncrement"];
   }
+  String _name;
+  SqlType _type;
+  bool _nullable;
+  bool _autoIncrement;
   Table _table;
 }
 
