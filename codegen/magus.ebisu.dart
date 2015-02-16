@@ -16,7 +16,7 @@ void main() {
     ..doc = descr
     ..pubSpec.doc = descr
     ..pubSpec.homepage = 'https://github.com/patefacio/magus'
-    ..pubSpec.version = '0.0.3'
+    ..pubSpec.version = '0.0.4'
     ..license = 'boost'
     ..includeHop = true
     ..rootPath = '$_topDir'

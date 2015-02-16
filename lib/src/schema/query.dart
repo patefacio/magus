@@ -51,10 +51,21 @@ class JoinType implements Comparable<JoinType> {
 
 }
 
-const INNER = JoinType.INNER;
-const LEFT = JoinType.LEFT;
-const RIGHT = JoinType.RIGHT;
-const FULL = JoinType.FULL;
+/// Convenient access to JoinType.INNER with *INNER* see [JoinType].
+///
+const JoinType INNER = JoinType.INNER;
+
+/// Convenient access to JoinType.LEFT with *LEFT* see [JoinType].
+///
+const JoinType LEFT = JoinType.LEFT;
+
+/// Convenient access to JoinType.RIGHT with *RIGHT* see [JoinType].
+///
+const JoinType RIGHT = JoinType.RIGHT;
+
+/// Convenient access to JoinType.FULL with *FULL* see [JoinType].
+///
+const JoinType FULL = JoinType.FULL;
 
 
 /// SQL Expression
