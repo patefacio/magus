@@ -24,7 +24,7 @@ dev_dependencies:
 # custom <magus dev dependencies>
 
 environment:
-  sdk: ">=0.8.10+6 <2.0.0"
+  sdk: ">=1.8.0 <2.0.0"
 
 # end <magus dev dependencies>
 
