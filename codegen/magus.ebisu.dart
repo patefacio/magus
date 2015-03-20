@@ -10,15 +10,15 @@ void main() {
       print("${r.loggerName} [${r.level}]:\t${r.message}"));
   String here = path.absolute(Platform.script.path);
   _topDir = path.dirname(path.dirname(here));
-  bool jsonToString = true;
+  bool hasJsonToString = true;
   final descr = 'Package for reading schema and making metadata available';
   System ebisu = system('magus')
     ..doc = descr
     ..pubSpec.doc = descr
     ..pubSpec.homepage = 'https://github.com/patefacio/magus'
-    ..pubSpec.version = '0.0.4'
+    ..pubSpec.version = '0.0.5'
     ..license = 'boost'
-    ..includeHop = true
+    ..includesHop = true
     ..rootPath = '$_topDir'
     ..testLibraries = [
       library('schema_reading'),
@@ -76,33 +76,44 @@ Support for parsing odbc ini files to retrieve DSN
           ],
 
           class_('sql_string')
-          ..jsonSupport = true
+          ..hasJsonSupport = true
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..type = 'int'..access = RO..ctors = [''],
-            member('is_varying')..type = 'bool'..access = RO..ctors = [''],
+            member('length')
+            ..doc = 'Length of the integer *in characters*'
+            ..type = 'int'..access = RO..ctors = [''],
+            member('is_varying')
+            ..doc = 'If true the string is varying'
+            ..type = 'bool'..access = RO..ctors = [''],
           ],
 
           class_('sql_int')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('length')..type = 'int'..access = RO..ctors = [''],
-            member('display_length')..type = 'int'..access = RO..ctors = [''],
-            member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
+            member('length')
+            ..doc = 'Length of the integer *in bytes*'
+            ..type = 'int'..access = RO..ctors = [''],
+            member('display_length')
+            ..doc = 'Display length used by databases to limit width when displaying'
+            ..type = 'int'..access = RO..ctors = [''],
+            member('unsigned')
+            ..doc = 'Display if true the integer is unsigned'
+            ..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_decimal')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('precision')..type = 'int'..access = RO..ctors = [''],
+            member('precision')
+            ..type = 'int'..access = RO..ctors = [''],
             member('scale')..type = 'int'..access = RO..ctors = [''],
             member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
           class_('sql_binary')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('length')..type = 'int'..access = RO..ctors = [''],
@@ -110,11 +121,15 @@ Support for parsing odbc ini files to retrieve DSN
           ],
 
           class_('sql_float')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
-            member('precision')..type = 'int'..access = RO..ctors = [''],
-            member('scale')..type = 'int'..access = RO..ctors = [''],
+            member('precision')
+            ..doc = 'Precision *in digits* - for portability best not to use'
+            ..type = 'int'..access = RO..ctors = [''],
+            member('scale')
+            ..doc = 'Scale *in digits* - for portability best not to use'
+            ..type = 'int'..access = RO..ctors = [''],
             member('unsigned')..type = 'bool'..access = RO..ctorsOpt = ['']..ctorInit = 'false',
           ],
 
@@ -124,14 +139,14 @@ Support for parsing odbc ini files to retrieve DSN
           ],
 
           class_('sql_time')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('has_timezone')..type = 'bool'..access = RO..ctors = [''],
           ],
 
           class_('sql_timestamp')
-          ..jsonToString = jsonToString
+          ..hasJsonToString = hasJsonToString
           ..mixins = [ 'TypeExtensionMixin' ]
           ..members = [
             member('has_timezone')..type = 'bool'..access = RO..ctors = [''],
@@ -175,9 +190,9 @@ from functional requirements'''
         ..doc = 'Metadata required for a database query'
         ..enums = [
           enum_('join_type')
-          ..libraryScopedValues = true
+          ..hasLibraryScopedValues = true
           ..isSnakeString = true
-          ..jsonSupport = true
+          ..hasJsonSupport = true
           ..values = [
             id('inner'), id('left'), id('right'), id('full'),
           ],
@@ -277,7 +292,7 @@ return fields. This provides such an interface.
           class_('times')
           ..extend = 'BinaryExpr',
           class_('join')
-          ..immutable = true
+          ..isImmutable = true
           ..members = [
             member('table')..type = 'Table',
             member('join_expr')..type = 'Expr',
@@ -319,8 +334,8 @@ derivative.'''
         ..isAbstract = true,
         class_('fkey_path_entry')
         ..doc = 'For a depth first search of related tables, this is one entry'
-        ..jsonToString = jsonToString
-        //..immutable = true
+        ..hasJsonToString = hasJsonToString
+        //..isImmutable = true
         ..members = [
           member('name')
           ..doc = 'Name of the fkey constraint linking these tables'
@@ -342,9 +357,9 @@ A named database schema with the corresponding table metadata
 associated with a specific engine.
 '''
         ..ctorCustoms = ['']
-        ..jsonToString = jsonToString
+        ..hasJsonToString = hasJsonToString
         ..members = ([
-          member('engine')..type = 'Engine'..jsonTransient = true,
+          member('engine')..type = 'Engine'..isJsonTransient = true,
           member('name'),
           member('tables')..type = 'List<Table>',
         ]
@@ -367,8 +382,8 @@ of referred to tables
 Spec class for a ForeignKey - indicating the relationship by naming
 the tables and columns
 '''
-        ..jsonToString = jsonToString
-        ..immutable = true
+        ..hasJsonToString = hasJsonToString
+        ..isImmutable = true
         ..members = [
           member('name'),
           member('ref_table'),
@@ -376,7 +391,7 @@ the tables and columns
           member('ref_columns')..type = 'List<String>',
         ],
         class_('foreign_key')
-        ..jsonToString = jsonToString
+        ..hasJsonToString = hasJsonToString
         ..members = [
           member('name')
           ..doc = 'Name of the foreign key definition'
@@ -392,14 +407,14 @@ the tables and columns
           ..type = 'List<Column>'..access = RO..ctors = [''],
         ],
         class_('unique_key')
-        ..jsonToString = jsonToString
-        ..immutable = true
+        ..hasJsonToString = hasJsonToString
+        ..isImmutable = true
         ..members = [
           member('name'),
           member('columns')..type = 'List<Column>',
         ],
         class_('table')
-        ..jsonToString = jsonToString
+        ..hasJsonToString = hasJsonToString
         ..ctorCustoms = ['']
         ..members = (
           [
@@ -417,10 +432,10 @@ the tables and columns
             member('column_map')..type = 'Map<String, Column>'..access = IA..classInit = {},
             member('value_columns')..type = 'List<Column>'..access = RO,
             member('foreign_keys')..type = 'Map<String, ForeignKey>'..access = RO,
-            member('schema')..type = 'Schema'..access = RO..jsonTransient = true,
+            member('schema')..type = 'Schema'..access = RO..isJsonTransient = true,
           ])),
         class_('column')
-        ..jsonToString = jsonToString
+        ..hasJsonToString = hasJsonToString
         ..members = (
           [
             member('name'),
@@ -430,10 +445,11 @@ the tables and columns
           ]
           ..forEach((member) => member..access = RO..ctors = [''])
           ..addAll([
-            member('table')..type = 'Table'..access = RO..jsonTransient = true,
+            member('table')..type = 'Table'..access = RO..isJsonTransient = true,
           ])),
       ],
       library('mysql')
+      ..includesLogger = true
       ..imports = [
         'dart:async',
         "'package:sqljocky/sqljocky.dart' hide Query",
@@ -465,16 +481,16 @@ the tables and columns
         ..classes = [
           class_('unique_key_spec')
           ..doc = 'Spec class for a UniqueKey - indicating the relationship by naming the columns in the unique constraint'
-          ..jsonToString = jsonToString
-          ..immutable = true
+          ..hasJsonToString = hasJsonToString
+          ..isImmutable = true
           ..members = [
             member('name'),
             member('columns')..type = 'List<String>',
           ],
           class_('primary_key_spec')
           ..doc = 'Spec class for a PrimaryKey - indicating the key columns with string names'
-          ..jsonToString = jsonToString
-          ..immutable = true
+          ..hasJsonToString = hasJsonToString
+          ..isImmutable = true
           ..members = [
             member('columns')..type = 'List<String>',
           ],

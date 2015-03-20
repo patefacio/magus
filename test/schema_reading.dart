@@ -1,5 +1,7 @@
 library magus.test.schema_reading;
 
+import 'package:args/args.dart';
+import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
 // custom <additional imports>
 
@@ -10,9 +12,14 @@ import 'package:quiver/iterables.dart';
 
 // end <additional imports>
 
+final _logger = new Logger('schema_reading');
+
 // custom <library schema_reading>
 // end <library schema_reading>
-main() {
+main([List<String> args]) {
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.level = Level.OFF;
 // custom <main>
 
   test('read_schema', () async {

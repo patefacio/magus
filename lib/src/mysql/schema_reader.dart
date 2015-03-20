@@ -102,9 +102,14 @@ class MysqlSchemaParser {
       } else if(entry.contains('UNIQUE KEY')) {
         uniqueKeySpecs.add(_makeUniqueKeySpec(entry));
       } else {
-        //print("UNKONWN $tableName => $entry");
+        _logger.warning('''
+Unsupported line in create table:
+**** line ***
+$entry
+**** create ***
+$create
+''');
       }
-
     });
     assert(columns.length>0);
 
@@ -238,7 +243,7 @@ class MysqlSchemaParser {
       throw "Found unsupported temporal type $mysqlType";
     }
 
-    print("WARNING: add support for $mysqlType");
+    _logger.warning("Add support for $mysqlType!");
     return null;
   }
 
@@ -307,6 +312,7 @@ class MysqlSchemaReader extends SchemaReader {
 
   Future<Schema> readSchema(String schemaName) async {
     final tableCreates = await tableCreateStatements(schemaName);
+    _logger.info(tableCreates);
     final tables = new MysqlSchemaParser().parseTables(tableCreates);
     return new Schema(engine, schemaName, tables);
   }

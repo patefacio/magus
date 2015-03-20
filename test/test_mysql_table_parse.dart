@@ -1,5 +1,7 @@
 library magus.test.test_mysql_table_parse;
 
+import 'package:args/args.dart';
+import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
 // custom <additional imports>
 
@@ -9,6 +11,8 @@ import 'package:magus/mysql.dart';
 import 'package:quiver/iterables.dart';
 
 // end <additional imports>
+
+final _logger = new Logger('test_mysql_table_parse');
 
 // custom <library test_mysql_table_parse>
 
@@ -78,7 +82,10 @@ CREATE TABLE `multi_fkey` (
 ''';
 
 // end <library test_mysql_table_parse>
-main() {
+main([List<String> args]) {
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.level = Level.OFF;
 // custom <main>
 
   group('table creates', () {

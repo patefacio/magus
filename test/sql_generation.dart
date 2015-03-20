@@ -1,5 +1,7 @@
 library magus.test.sql_generation;
 
+import 'package:args/args.dart';
+import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
 // custom <additional imports>
 import 'package:magus/schema.dart';
@@ -7,9 +9,14 @@ import 'package:magus/odbc_ini.dart';
 import 'package:magus/mysql.dart';
 // end <additional imports>
 
+final _logger = new Logger('sql_generation');
+
 // custom <library sql_generation>
 // end <library sql_generation>
-main() {
+main([List<String> args]) {
+  Logger.root.onRecord.listen((LogRecord r) =>
+      print("${r.loggerName} [${r.level}]:\t${r.message}"));
+  Logger.root.level = Level.OFF;
 // custom <main>
 
   var engine;

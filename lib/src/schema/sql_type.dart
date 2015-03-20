@@ -19,7 +19,9 @@ class SqlString extends Object with TypeExtensionMixin {
 
   SqlString._default();
 
+  /// Length of the integer *in characters*
   int get length => _length;
+  /// If true the string is varying
   bool get isVarying => _isVarying;
   // custom <class SqlString>
 
@@ -53,8 +55,11 @@ class SqlInt extends Object with TypeExtensionMixin {
 
   SqlInt._default();
 
+  /// Length of the integer *in bytes*
   int get length => _length;
+  /// Display length used by databases to limit width when displaying
   int get displayLength => _displayLength;
+  /// Display if true the integer is unsigned
   bool get unsigned => _unsigned;
   // custom <class SqlInt>
 
@@ -170,7 +175,9 @@ class SqlFloat extends Object with TypeExtensionMixin {
 
   SqlFloat._default();
 
+  /// Precision *in digits* - for portability best not to use
   int get precision => _precision;
+  /// Scale *in digits* - for portability best not to use
   int get scale => _scale;
   bool get unsigned => _unsigned;
   // custom <class SqlFloat>
