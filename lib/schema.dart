@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert' as convert;
 import 'dart:mirrors';
-import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
+import 'package:ebisu/ebisu.dart' as ebisu;
 import 'package:quiver/iterables.dart';
 // custom <additional imports>
 // end <additional imports>
@@ -63,14 +63,14 @@ class FkeyPathEntry {
 
   // end <class FkeyPathEntry>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "table": ebisu_utils.toJson(table),
-      "refTable": ebisu_utils.toJson(refTable),
-      "foreignKeySpec": ebisu_utils.toJson(foreignKeySpec),
+      "name": ebisu.toJson(name),
+      "table": ebisu.toJson(table),
+      "refTable": ebisu.toJson(refTable),
+      "foreignKeySpec": ebisu.toJson(foreignKeySpec),
   };
 
   static FkeyPathEntry fromJson(Object json) {
@@ -213,14 +213,14 @@ class Schema {
 
   // end <class Schema>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "tables": ebisu_utils.toJson(tables),
-      "tableMap": ebisu_utils.toJson(_tableMap),
-      "dfsFkeyPaths": ebisu_utils.toJson(_dfsFkeyPaths),
+      "name": ebisu.toJson(name),
+      "tables": ebisu.toJson(tables),
+      "tableMap": ebisu.toJson(_tableMap),
+      "dfsFkeyPaths": ebisu.toJson(_dfsFkeyPaths),
   };
 
   static Schema fromJson(Object json) {
@@ -236,18 +236,18 @@ class Schema {
   void _fromJsonMapImpl(Map jsonMap) {
     _name = jsonMap["name"];
     // tables is List<Table>
-    _tables = ebisu_utils
+    _tables = ebisu
       .constructListFromJsonData(jsonMap["tables"],
                                  (data) => Table.fromJson(data))
     ;
     // tableMap is Map<String, Table>
-    _tableMap = ebisu_utils
+    _tableMap = ebisu
       .constructMapFromJsonData(
         jsonMap["tableMap"],
         (value) => Table.fromJson(value))
     ;
     // dfsFkeyPaths is Map<String, List<FkeyPathEntry>>
-    _dfsFkeyPaths = ebisu_utils
+    _dfsFkeyPaths = ebisu
       .constructMapFromJsonData(
         jsonMap["dfsFkeyPaths"],
         (value) => value)
@@ -275,14 +275,14 @@ class ForeignKeySpec {
   // custom <class ForeignKeySpec>
   // end <class ForeignKeySpec>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "refTable": ebisu_utils.toJson(refTable),
-      "columns": ebisu_utils.toJson(columns),
-      "refColumns": ebisu_utils.toJson(refColumns),
+      "name": ebisu.toJson(name),
+      "refTable": ebisu.toJson(refTable),
+      "columns": ebisu.toJson(columns),
+      "refColumns": ebisu.toJson(refColumns),
   };
 
   static ForeignKeySpec fromJson(Object json) {
@@ -298,11 +298,11 @@ class ForeignKeySpec {
     name = jsonMap["name"],
     refTable = jsonMap["refTable"],
     // columns is List<String>
-    columns = ebisu_utils
+    columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => data),
     // refColumns is List<String>
-    refColumns = ebisu_utils
+    refColumns = ebisu
       .constructListFromJsonData(jsonMap["refColumns"],
                                  (data) => data);
 
@@ -333,14 +333,14 @@ class ForeignKey {
 
   // end <class ForeignKey>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "columns": ebisu_utils.toJson(columns),
-      "refTable": ebisu_utils.toJson(refTable),
-      "refColumns": ebisu_utils.toJson(refColumns),
+      "name": ebisu.toJson(name),
+      "columns": ebisu.toJson(columns),
+      "refTable": ebisu.toJson(refTable),
+      "refColumns": ebisu.toJson(refColumns),
   };
 
   static ForeignKey fromJson(Object json) {
@@ -356,13 +356,13 @@ class ForeignKey {
   void _fromJsonMapImpl(Map jsonMap) {
     _name = jsonMap["name"];
     // columns is List<Column>
-    _columns = ebisu_utils
+    _columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data))
     ;
     _refTable = Table.fromJson(jsonMap["refTable"]);
     // refColumns is List<Column>
-    _refColumns = ebisu_utils
+    _refColumns = ebisu
       .constructListFromJsonData(jsonMap["refColumns"],
                                  (data) => Column.fromJson(data))
   ;
@@ -381,12 +381,12 @@ class UniqueKey {
   // custom <class UniqueKey>
   // end <class UniqueKey>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "columns": ebisu_utils.toJson(columns),
+      "name": ebisu.toJson(name),
+      "columns": ebisu.toJson(columns),
   };
 
   static UniqueKey fromJson(Object json) {
@@ -401,7 +401,7 @@ class UniqueKey {
   UniqueKey._fromJsonMapImpl(Map jsonMap) :
     name = jsonMap["name"],
     // columns is List<Column>
-    columns = ebisu_utils
+    columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data));
 
@@ -470,18 +470,18 @@ class Table {
 
   // end <class Table>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "columns": ebisu_utils.toJson(columns),
-      "primaryKey": ebisu_utils.toJson(primaryKey),
-      "uniqueKeys": ebisu_utils.toJson(uniqueKeys),
-      "foreignKeySpecs": ebisu_utils.toJson(foreignKeySpecs),
-      "columnMap": ebisu_utils.toJson(_columnMap),
-      "valueColumns": ebisu_utils.toJson(valueColumns),
-      "foreignKeys": ebisu_utils.toJson(foreignKeys),
+      "name": ebisu.toJson(name),
+      "columns": ebisu.toJson(columns),
+      "primaryKey": ebisu.toJson(primaryKey),
+      "uniqueKeys": ebisu.toJson(uniqueKeys),
+      "foreignKeySpecs": ebisu.toJson(foreignKeySpecs),
+      "columnMap": ebisu.toJson(_columnMap),
+      "valueColumns": ebisu.toJson(valueColumns),
+      "foreignKeys": ebisu.toJson(foreignKeys),
   };
 
   static Table fromJson(Object json) {
@@ -497,38 +497,38 @@ class Table {
   void _fromJsonMapImpl(Map jsonMap) {
     _name = jsonMap["name"];
     // columns is List<Column>
-    _columns = ebisu_utils
+    _columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => Column.fromJson(data))
     ;
     // primaryKey is List<Column>
-    _primaryKey = ebisu_utils
+    _primaryKey = ebisu
       .constructListFromJsonData(jsonMap["primaryKey"],
                                  (data) => Column.fromJson(data))
     ;
     // uniqueKeys is List<UniqueKey>
-    _uniqueKeys = ebisu_utils
+    _uniqueKeys = ebisu
       .constructListFromJsonData(jsonMap["uniqueKeys"],
                                  (data) => UniqueKey.fromJson(data))
     ;
     // foreignKeySpecs is List<ForeignKeySpec>
-    _foreignKeySpecs = ebisu_utils
+    _foreignKeySpecs = ebisu
       .constructListFromJsonData(jsonMap["foreignKeySpecs"],
                                  (data) => ForeignKeySpec.fromJson(data))
     ;
     // columnMap is Map<String, Column>
-    _columnMap = ebisu_utils
+    _columnMap = ebisu
       .constructMapFromJsonData(
         jsonMap["columnMap"],
         (value) => Column.fromJson(value))
     ;
     // valueColumns is List<Column>
-    _valueColumns = ebisu_utils
+    _valueColumns = ebisu
       .constructListFromJsonData(jsonMap["valueColumns"],
                                  (data) => Column.fromJson(data))
     ;
     // foreignKeys is Map<String, ForeignKey>
-    _foreignKeys = ebisu_utils
+    _foreignKeys = ebisu
       .constructMapFromJsonData(
         jsonMap["foreignKeys"],
         (value) => ForeignKey.fromJson(value))
@@ -561,14 +561,14 @@ class Column {
 
   // end <class Column>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "type": ebisu_utils.toJson(type),
-      "nullable": ebisu_utils.toJson(nullable),
-      "autoIncrement": ebisu_utils.toJson(autoIncrement),
+      "name": ebisu.toJson(name),
+      "type": ebisu.toJson(type),
+      "nullable": ebisu.toJson(nullable),
+      "autoIncrement": ebisu.toJson(autoIncrement),
   };
 
   static Column fromJson(Object json) {

@@ -9,12 +9,12 @@ class UniqueKeySpec {
   // custom <class UniqueKeySpec>
   // end <class UniqueKeySpec>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "name": ebisu_utils.toJson(name),
-      "columns": ebisu_utils.toJson(columns),
+      "name": ebisu.toJson(name),
+      "columns": ebisu.toJson(columns),
   };
 
   static UniqueKeySpec fromJson(Object json) {
@@ -29,7 +29,7 @@ class UniqueKeySpec {
   UniqueKeySpec._fromJsonMapImpl(Map jsonMap) :
     name = jsonMap["name"],
     // columns is List<String>
-    columns = ebisu_utils
+    columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => data);
 
@@ -47,11 +47,11 @@ class PrimaryKeySpec {
   // custom <class PrimaryKeySpec>
   // end <class PrimaryKeySpec>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "columns": ebisu_utils.toJson(columns),
+      "columns": ebisu.toJson(columns),
   };
 
   static PrimaryKeySpec fromJson(Object json) {
@@ -65,7 +65,7 @@ class PrimaryKeySpec {
 
   PrimaryKeySpec._fromJsonMapImpl(Map jsonMap) :
     // columns is List<String>
-    columns = ebisu_utils
+    columns = ebisu
       .constructListFromJsonData(jsonMap["columns"],
                                  (data) => data);
 

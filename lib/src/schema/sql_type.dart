@@ -28,8 +28,8 @@ class SqlString extends Object with TypeExtensionMixin {
   // end <class SqlString>
 
   Map toJson() => {
-      "length": ebisu_utils.toJson(length),
-      "isVarying": ebisu_utils.toJson(isVarying),// TODO: consider mixin support
+      "length": ebisu.toJson(length),
+      "isVarying": ebisu.toJson(isVarying),// TODO: consider mixin support
   };
 
   static SqlString fromJson(Object json) {
@@ -65,13 +65,13 @@ class SqlInt extends Object with TypeExtensionMixin {
 
   // end <class SqlInt>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "length": ebisu_utils.toJson(length),
-      "displayLength": ebisu_utils.toJson(displayLength),
-      "unsigned": ebisu_utils.toJson(unsigned),// TODO: consider mixin support
+      "length": ebisu.toJson(length),
+      "displayLength": ebisu.toJson(displayLength),
+      "unsigned": ebisu.toJson(unsigned),// TODO: consider mixin support
   };
 
   static SqlInt fromJson(Object json) {
@@ -105,13 +105,13 @@ class SqlDecimal extends Object with TypeExtensionMixin {
   // custom <class SqlDecimal>
   // end <class SqlDecimal>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "precision": ebisu_utils.toJson(precision),
-      "scale": ebisu_utils.toJson(scale),
-      "unsigned": ebisu_utils.toJson(unsigned),// TODO: consider mixin support
+      "precision": ebisu.toJson(precision),
+      "scale": ebisu.toJson(scale),
+      "unsigned": ebisu.toJson(unsigned),// TODO: consider mixin support
   };
 
   static SqlDecimal fromJson(Object json) {
@@ -144,12 +144,12 @@ class SqlBinary extends Object with TypeExtensionMixin {
   // custom <class SqlBinary>
   // end <class SqlBinary>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "length": ebisu_utils.toJson(length),
-      "isVarying": ebisu_utils.toJson(isVarying),// TODO: consider mixin support
+      "length": ebisu.toJson(length),
+      "isVarying": ebisu.toJson(isVarying),// TODO: consider mixin support
   };
 
   static SqlBinary fromJson(Object json) {
@@ -183,13 +183,13 @@ class SqlFloat extends Object with TypeExtensionMixin {
   // custom <class SqlFloat>
   // end <class SqlFloat>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "precision": ebisu_utils.toJson(precision),
-      "scale": ebisu_utils.toJson(scale),
-      "unsigned": ebisu_utils.toJson(unsigned),// TODO: consider mixin support
+      "precision": ebisu.toJson(precision),
+      "scale": ebisu.toJson(scale),
+      "unsigned": ebisu.toJson(unsigned),// TODO: consider mixin support
   };
 
   static SqlFloat fromJson(Object json) {
@@ -231,11 +231,11 @@ class SqlTime extends Object with TypeExtensionMixin {
   // custom <class SqlTime>
   // end <class SqlTime>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "hasTimezone": ebisu_utils.toJson(hasTimezone),// TODO: consider mixin support
+      "hasTimezone": ebisu.toJson(hasTimezone),// TODO: consider mixin support
   };
 
   static SqlTime fromJson(Object json) {
@@ -264,12 +264,12 @@ class SqlTimestamp extends Object with TypeExtensionMixin {
   // custom <class SqlTimestamp>
   // end <class SqlTimestamp>
 
-  toString() => '(${runtimeType}) => ${ebisu_utils.prettyJsonMap(toJson())}';
+  toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
   Map toJson() => {
-      "hasTimezone": ebisu_utils.toJson(hasTimezone),
-      "autoUpdate": ebisu_utils.toJson(autoUpdate),// TODO: consider mixin support
+      "hasTimezone": ebisu.toJson(hasTimezone),
+      "autoUpdate": ebisu.toJson(autoUpdate),// TODO: consider mixin support
   };
 
   static SqlTimestamp fromJson(Object json) {

@@ -2,7 +2,7 @@ library magus.mysql;
 
 import 'dart:async';
 import 'dart:convert' as convert;
-import 'package:ebisu/ebisu_utils.dart' as ebisu_utils;
+import 'package:ebisu/ebisu.dart' as ebisu;
 import 'package:logging/logging.dart';
 import 'package:magus/odbc_ini.dart';
 import 'package:magus/schema.dart';
