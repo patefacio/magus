@@ -17,33 +17,44 @@ part 'src/schema/query.dart';
 /// Establishes an interface to write schema to a specific Engine
 /// derivative.
 abstract class SchemaWriter {
+
   SchemaWriter(this._engine);
 
   Engine get engine => _engine;
+
   // custom <class SchemaWriter>
 
   writeSchema(Schema schema);
 
   // end <class SchemaWriter>
+
   Engine _engine;
+
 }
+
 
 /// Establishes an interface to read schema to a specific Engine
 /// derivative.
 abstract class SchemaReader {
+
   SchemaReader(this._engine);
 
   Engine get engine => _engine;
+
   // custom <class SchemaReader>
 
   Future<Schema> readSchema(String schemaName);
 
   // end <class SchemaReader>
+
   Engine _engine;
+
 }
+
 
 /// For a depth first search of related tables, this is one entry
 class FkeyPathEntry {
+
   FkeyPathEntry(this._name, this._table, this._refTable, this._foreignKeySpec);
 
   FkeyPathEntry._default();
@@ -56,12 +67,14 @@ class FkeyPathEntry {
   Table get refTable => _refTable;
   /// Details of the foreign key at this path
   ForeignKeySpec get foreignKeySpec => _foreignKeySpec;
+
   // custom <class FkeyPathEntry>
 
   get _srcColNames => foreignKeySpec.columns;
   get _refColNames => foreignKeySpec.refColumns;
 
   // end <class FkeyPathEntry>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -89,16 +102,20 @@ class FkeyPathEntry {
     _refTable = Table.fromJson(jsonMap["refTable"]);
     _foreignKeySpec = ForeignKeySpec.fromJson(jsonMap["foreignKeySpec"]);
   }
+
   String _name;
   Table _table;
   Table _refTable;
   ForeignKeySpec _foreignKeySpec;
+
 }
+
 
 /// A named database schema with the corresponding table metadata
 /// associated with a specific engine.
 ///
 class Schema {
+
   Schema(this._engine, this._name, this._tables) {
     // custom <Schema>
 
@@ -156,6 +173,7 @@ class Schema {
   Engine get engine => _engine;
   String get name => _name;
   List<Table> get tables => _tables;
+
   // custom <class Schema>
 
   Table getTable(String tableName) => _tableMap[tableName];
@@ -213,6 +231,7 @@ class Schema {
 
   // end <class Schema>
 
+
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
 
@@ -253,6 +272,7 @@ class Schema {
         (value) => value)
   ;
   }
+
   Engine _engine;
   String _name;
   List<Table> _tables;
@@ -260,20 +280,25 @@ class Schema {
   /// For each table a list of path entries comprising a depth-first-search
   /// of referred to tables
   Map<String, List<FkeyPathEntry>> _dfsFkeyPaths = {};
+
 }
+
 
 /// Spec class for a ForeignKey - indicating the relationship by naming
 /// the tables and columns
 ///
 class ForeignKeySpec {
+
   const ForeignKeySpec(this.name, this.refTable, this.columns, this.refColumns);
 
   final String name;
   final String refTable;
   final List<String> columns;
   final List<String> refColumns;
+
   // custom <class ForeignKeySpec>
   // end <class ForeignKeySpec>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -314,7 +339,9 @@ class ForeignKeySpec {
 
 }
 
+
 class ForeignKey {
+
   ForeignKey(this._name, this._columns, this._refTable, this._refColumns);
 
   ForeignKey._default();
@@ -327,11 +354,13 @@ class ForeignKey {
   Table get refTable => _refTable;
   /// 
   List<Column> get refColumns => _refColumns;
+
   // custom <class ForeignKey>
 
   get columnPairs => zip([ columns, refColumns ]);
 
   // end <class ForeignKey>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -367,19 +396,25 @@ class ForeignKey {
                                  (data) => Column.fromJson(data))
   ;
   }
+
   String _name;
   List<Column> _columns;
   Table _refTable;
   List<Column> _refColumns;
+
 }
 
+
 class UniqueKey {
+
   const UniqueKey(this.name, this.columns);
 
   final String name;
   final List<Column> columns;
+
   // custom <class UniqueKey>
   // end <class UniqueKey>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -413,7 +448,9 @@ class UniqueKey {
 
 }
 
+
 class Table {
+
   Table(this._name, this._columns, this._primaryKey, this._uniqueKeys,
     this._foreignKeySpecs) {
     // custom <Table>
@@ -443,6 +480,7 @@ class Table {
   List<Column> get valueColumns => _valueColumns;
   Map<String, ForeignKey> get foreignKeys => _foreignKeys;
   Schema get schema => _schema;
+
   // custom <class Table>
 
   Column getColumn(String columnName) => _columnMap[columnName];
@@ -469,6 +507,7 @@ class Table {
   isPrimaryKeyColumn(Column col) => primaryKey.contains(col);
 
   // end <class Table>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -534,6 +573,7 @@ class Table {
         (value) => ForeignKey.fromJson(value))
   ;
   }
+
   String _name;
   List<Column> _columns;
   List<Column> _primaryKey;
@@ -543,9 +583,12 @@ class Table {
   List<Column> _valueColumns;
   Map<String, ForeignKey> _foreignKeys;
   Schema _schema;
+
 }
 
+
 class Column {
+
   Column(this._name, this._type, this._nullable, this._autoIncrement);
 
   Column._default();
@@ -555,11 +598,13 @@ class Column {
   bool get nullable => _nullable;
   bool get autoIncrement => _autoIncrement;
   Table get table => _table;
+
   // custom <class Column>
 
   get qualifiedName => '${_table.name}.$name';
 
   // end <class Column>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -587,12 +632,15 @@ class Column {
     _nullable = jsonMap["nullable"];
     _autoIncrement = jsonMap["autoIncrement"];
   }
+
   String _name;
   SqlType _type;
   bool _nullable;
   bool _autoIncrement;
   Table _table;
+
 }
+
 
 // custom <library schema>
 

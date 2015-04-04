@@ -2,6 +2,7 @@ part of magus.mysql;
 
 class MysqlEngine
   implements Engine {
+
   // custom <class MysqlEngine>
 
   MysqlEngine(this._connectionPool) :
@@ -17,11 +18,15 @@ class MysqlEngine
 
 
   // end <class MysqlEngine>
+
   final ConnectionPool _connectionPool;
   final MysqlVisitor _visitor;
+
 }
 
+
 class MysqlVisitor extends SqlVisitor {
+
   // custom <class MysqlVisitor>
 
   String dropAll(Schema schema) =>
@@ -40,6 +45,8 @@ class MysqlVisitor extends SqlVisitor {
     query.returns.map((e) => evalExpr(e));
 
   // end <class MysqlVisitor>
+
 }
+
 // custom <part engine>
 // end <part engine>

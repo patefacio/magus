@@ -6,6 +6,7 @@ part of magus.schema;
 /// appropriate [Table], [Expr], [Query] and [Schema]
 ///
 abstract class Engine {
+
   // custom <class Engine>
 
   /// Create a [SchemaWriter] specific to this engine
@@ -27,6 +28,8 @@ abstract class Engine {
   QueryVisitor get queryVisitor;
 
   // end <class Engine>
+
 }
+
 // custom <part engine>
 // end <part engine>

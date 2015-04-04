@@ -11,7 +11,9 @@ import 'package:sqljocky/sqljocky.dart';
 
 /// Contains entries *of interest* per datasource parsed from an odbc ini file
 class OdbcIni {
+
   Map<String, OdbcIniEntry> get entries => _entries;
+
   // custom <class OdbcIni>
 
   factory OdbcIni([String fileName]) {
@@ -75,22 +77,30 @@ ${_entries[section]}''').join('\n');
   static RegExp _databaseRe = new RegExp('database', caseSensitive:false);
 
   // end <class OdbcIni>
+
   Map<String, OdbcIniEntry> _entries = {};
+
 }
+
 
 /// odbc.ini entries for a given DSN that are *of interest* enabling connection
 class OdbcIniEntry {
+
   OdbcIniEntry(this._user, this._password, this._database);
 
   String get user => _user;
   String get password => _password;
   String get database => _database;
+
   // custom <class OdbcIniEntry>
   // end <class OdbcIniEntry>
+
   String _user;
   String _password;
   String _database;
+
 }
+
 
 // custom <library odbc_ini>
 // end <library odbc_ini>

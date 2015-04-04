@@ -45,6 +45,7 @@ class JoinType implements Comparable<JoinType> {
   }
 
   int toJson() => value;
+
   static JoinType fromJson(int v) {
     return v==null? null : values[v];
   }
@@ -75,9 +76,11 @@ const JoinType FULL = JoinType.FULL;
 ///
 ///
 abstract class Expr {
+
   Expr([ this.alias ]);
 
   String alias;
+
   // custom <class Expr>
 
   toString() => 'Some Expr';
@@ -91,11 +94,15 @@ abstract class Expr {
   addColumns(Set<Column> out);
 
   // end <class Expr>
+
 }
+
 
 /// A single database column expression
 class Col extends Expr {
+
   Column get column => _column;
+
   // custom <class Col>
   Col(this._column, [String alias]) : super(alias);
 
@@ -106,12 +113,17 @@ class Col extends Expr {
   addColumns(Set<Column> out) => out.add(_column);
 
   // end <class Col>
+
   final Column _column;
+
 }
+
 
 /// A literal expression, as in SQL integer, float, string
 class Literal extends Expr {
+
   dynamic get value => _value;
+
   // custom <class Literal>
 
   Literal(this._value, [String alias]) : super(alias);
@@ -122,19 +134,27 @@ class Literal extends Expr {
   addColumns(Set<Column> out) {}
 
   // end <class Literal>
+
   dynamic _value;
+
 }
+
 
 /// A predicate expression - i.e. an expression that returns true or false
 abstract class Pred extends Expr {
+
   // custom <class Pred>
   Pred([ String alias ]) : super(alias);
   // end <class Pred>
+
 }
+
 
 /// A unary expression
 class UnaryExpr extends Expr {
+
   Expr expr;
+
   // custom <class UnaryExpr>
 
   UnaryExpr(e, [String alias]) :
@@ -144,11 +164,15 @@ class UnaryExpr extends Expr {
   addColumns(Set<Column> out) => expr.addColumns(out);
 
   // end <class UnaryExpr>
+
 }
 
+
 class BinaryExpr extends Expr {
+
   Expr a;
   Expr b;
+
   // custom <class BinaryExpr>
 
   BinaryExpr(a, b, [ String alias ]) :
@@ -162,11 +186,15 @@ class BinaryExpr extends Expr {
   }
 
   // end <class BinaryExpr>
+
 }
+
 
 /// Query unary predicate
 class UnaryPred extends Pred {
+
   Expr expr;
+
   // custom <class UnaryPred>
 
   UnaryPred(e, [String alias]) :
@@ -176,11 +204,15 @@ class UnaryPred extends Pred {
   addColumns(Set<Column> out) => expr.addColumns(out);
 
   // end <class UnaryPred>
+
 }
 
+
 class BinaryPred extends Pred {
+
   Expr a;
   Expr b;
+
   // custom <class BinaryPred>
 
   BinaryPred(a, b, [ String alias ]) :
@@ -194,10 +226,14 @@ class BinaryPred extends Pred {
   }
 
   // end <class BinaryPred>
+
 }
 
+
 class MultiPred extends Pred {
+
   List<Expr> exprs;
+
   // custom <class MultiPred>
 
   MultiPred(exprs, [ String alias ]) :
@@ -208,9 +244,12 @@ class MultiPred extends Pred {
     exprs.forEach((e) => e.addColumns(out));
 
   // end <class MultiPred>
+
 }
 
+
 class IsNull extends UnaryPred {
+
   // custom <class IsNull>
 
   IsNull(expr, [String alias]) :
@@ -219,9 +258,12 @@ class IsNull extends UnaryPred {
   toString() => '$expr IS NULL';
 
   // end <class IsNull>
+
 }
 
+
 class NotNull extends UnaryPred {
+
   // custom <class NotNull>
 
   NotNull(expr, [String alias]) :
@@ -230,9 +272,12 @@ class NotNull extends UnaryPred {
   toString() => '$expr IS NOT NULL';
 
   // end <class NotNull>
+
 }
 
+
 class Not extends UnaryPred {
+
   // custom <class Not>
 
   Not(expr, [String alias]) :
@@ -241,9 +286,12 @@ class Not extends UnaryPred {
   toString() => 'NOT $expr';
 
   // end <class Not>
+
 }
 
+
 class And extends BinaryPred {
+
   // custom <class And>
 
   And(a, b, [String alias]) :
@@ -252,9 +300,12 @@ class And extends BinaryPred {
   toString() => '$a AND $b';
 
   // end <class And>
+
 }
 
+
 class Or extends BinaryPred {
+
   // custom <class Or>
 
   Or(a, b, [String alias]) :
@@ -263,9 +314,12 @@ class Or extends BinaryPred {
   toString() => '$a OR $b';
 
   // end <class Or>
+
 }
 
+
 class MultiAnd extends MultiPred {
+
   // custom <class MultiAnd>
 
   MultiAnd(exprs, [String alias]) :
@@ -274,9 +328,12 @@ class MultiAnd extends MultiPred {
   toString() => exprs.join(' AND \n');
 
   // end <class MultiAnd>
+
 }
 
+
 class MultiOr extends MultiPred {
+
   // custom <class MultiOr>
 
   MultiOr(exprs, [String alias]) :
@@ -285,9 +342,12 @@ class MultiOr extends MultiPred {
   toString() => exprs.join(' OR \n');
 
   // end <class MultiOr>
+
 }
 
+
 class Eq extends BinaryPred {
+
   // custom <class Eq>
 
   Eq(a, b, [String alias]) :
@@ -296,9 +356,12 @@ class Eq extends BinaryPred {
   toString() => '$a = $b';
 
   // end <class Eq>
+
 }
 
+
 class NotEq extends BinaryPred {
+
   // custom <class NotEq>
 
   NotEq(a, b, [String alias]) :
@@ -307,9 +370,12 @@ class NotEq extends BinaryPred {
   toString() => '$a <> $b';
 
   // end <class NotEq>
+
 }
 
+
 class Like extends BinaryPred {
+
   // custom <class Like>
 
   Like(a, b, [String alias]) :
@@ -318,9 +384,12 @@ class Like extends BinaryPred {
   toString() => '$a LIKE $b';
 
   // end <class Like>
+
 }
 
+
 class Gt extends BinaryPred {
+
   // custom <class Gt>
 
   Gt(a, b, [String alias]) :
@@ -329,9 +398,12 @@ class Gt extends BinaryPred {
   toString() => '$a > $b';
 
   // end <class Gt>
+
 }
 
+
 class Lt extends BinaryPred {
+
   // custom <class Lt>
 
   Lt(a, b, [String alias]) :
@@ -340,9 +412,12 @@ class Lt extends BinaryPred {
   toString() => '$a < $b';
 
   // end <class Lt>
+
 }
 
+
 class Ge extends BinaryPred {
+
   // custom <class Ge>
 
   Ge(a, b, [String alias]) :
@@ -351,9 +426,12 @@ class Ge extends BinaryPred {
   toString() => '$a >= $b';
 
   // end <class Ge>
+
 }
 
+
 class Le extends BinaryPred {
+
   // custom <class Le>
 
   Le(a, b, [String alias]) :
@@ -362,9 +440,12 @@ class Le extends BinaryPred {
   toString() => '$a <= $b';
 
   // end <class Le>
+
 }
 
+
 class Abs extends UnaryExpr {
+
   // custom <class Abs>
 
   Abs(expr, [String alias]) :
@@ -373,9 +454,12 @@ class Abs extends UnaryExpr {
   toString() => 'ABS($expr)';
 
 // end <class Abs>
+
 }
 
+
 class Plus extends BinaryExpr {
+
   // custom <class Plus>
 
   Plus(a, b, [String alias]) :
@@ -384,9 +468,12 @@ class Plus extends BinaryExpr {
   toString() => '$a - $b';
 
   // end <class Plus>
+
 }
 
+
 class Minus extends BinaryExpr {
+
   // custom <class Minus>
 
   Minus(a, b, [String alias]) :
@@ -395,9 +482,12 @@ class Minus extends BinaryExpr {
   toString() => '$a - $b';
 
   // end <class Minus>
+
 }
 
+
 class Times extends BinaryExpr {
+
   // custom <class Times>
 
   Times(a, b, [String alias]) :
@@ -406,20 +496,26 @@ class Times extends BinaryExpr {
   toString() => '$a * $b';
 
   // end <class Times>
+
 }
 
+
 class Join {
+
   const Join(this.table, this.joinExpr, this.joinType);
 
   final Table table;
   final Expr joinExpr;
   final JoinType joinType;
+
   // custom <class Join>
 
   toString() => '$joinType join ${table.name} on ${joinExpr}';
 
   // end <class Join>
+
 }
+
 
 /// Build a query by specifying returns, joins [optionally], and a filter
 /// (i.e. where clause). The query builder will find all tables referenced by the
@@ -429,6 +525,7 @@ class Join {
 /// are imputed with equality expressions linking the two tables.
 ///
 class Query {
+
   final List<Expr> returns;
   List<Join> get joins => _joins;
   final bool imputeJoins;
@@ -436,6 +533,7 @@ class Query {
   final bool distinct;
   /// Tables hit by the query - determined by all columns hit by [returns] and [joins]
   List<Table> get tables => _tables;
+
   // custom <class Query>
 
   Query._all(this.returns, this._joins, this.imputeJoins, this.filter,
@@ -494,9 +592,12 @@ class Query {
   }
 
   // end <class Query>
+
   final List<Join> _joins;
   final List<Table> _tables;
+
 }
+
 // custom <part query>
 
 makeExpr(dynamic e) =>

@@ -2,19 +2,27 @@ part of magus.schema;
 
 /// Establishes interface for support sql datatypes
 abstract class SqlType {
+
   // custom <class SqlType>
 
   // end <class SqlType>
+
 }
+
 
 abstract class TypeExtensionMixin
   implements SqlType {
+
   dynamic extension;
+
   // custom <class TypeExtensionMixin>
   // end <class TypeExtensionMixin>
+
 }
 
+
 class SqlString extends Object with TypeExtensionMixin {
+
   SqlString(this._length, this._isVarying);
 
   SqlString._default();
@@ -23,9 +31,11 @@ class SqlString extends Object with TypeExtensionMixin {
   int get length => _length;
   /// If true the string is varying
   bool get isVarying => _isVarying;
+
   // custom <class SqlString>
 
   // end <class SqlString>
+
 
   Map toJson() => {
       "length": ebisu.toJson(length),
@@ -46,11 +56,15 @@ class SqlString extends Object with TypeExtensionMixin {
     _length = jsonMap["length"];
     _isVarying = jsonMap["isVarying"];
   }
+
   int _length;
   bool _isVarying;
+
 }
 
+
 class SqlInt extends Object with TypeExtensionMixin {
+
   SqlInt(this._length, this._displayLength, [ this._unsigned = false ]);
 
   SqlInt._default();
@@ -61,9 +75,11 @@ class SqlInt extends Object with TypeExtensionMixin {
   int get displayLength => _displayLength;
   /// Display if true the integer is unsigned
   bool get unsigned => _unsigned;
+
   // custom <class SqlInt>
 
   // end <class SqlInt>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -89,12 +105,16 @@ class SqlInt extends Object with TypeExtensionMixin {
     _displayLength = jsonMap["displayLength"];
     _unsigned = jsonMap["unsigned"];
   }
+
   int _length;
   int _displayLength;
   bool _unsigned;
+
 }
 
+
 class SqlDecimal extends Object with TypeExtensionMixin {
+
   SqlDecimal(this._precision, this._scale, [ this._unsigned = false ]);
 
   SqlDecimal._default();
@@ -102,8 +122,10 @@ class SqlDecimal extends Object with TypeExtensionMixin {
   int get precision => _precision;
   int get scale => _scale;
   bool get unsigned => _unsigned;
+
   // custom <class SqlDecimal>
   // end <class SqlDecimal>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -129,20 +151,26 @@ class SqlDecimal extends Object with TypeExtensionMixin {
     _scale = jsonMap["scale"];
     _unsigned = jsonMap["unsigned"];
   }
+
   int _precision;
   int _scale;
   bool _unsigned;
+
 }
 
+
 class SqlBinary extends Object with TypeExtensionMixin {
+
   SqlBinary(this._length, [ this._isVarying = true ]);
 
   SqlBinary._default();
 
   int get length => _length;
   bool get isVarying => _isVarying;
+
   // custom <class SqlBinary>
   // end <class SqlBinary>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -166,11 +194,15 @@ class SqlBinary extends Object with TypeExtensionMixin {
     _length = jsonMap["length"];
     _isVarying = jsonMap["isVarying"];
   }
+
   int _length;
   bool _isVarying;
+
 }
 
+
 class SqlFloat extends Object with TypeExtensionMixin {
+
   SqlFloat(this._precision, this._scale, [ this._unsigned = false ]);
 
   SqlFloat._default();
@@ -180,8 +212,10 @@ class SqlFloat extends Object with TypeExtensionMixin {
   /// Scale *in digits* - for portability best not to use
   int get scale => _scale;
   bool get unsigned => _unsigned;
+
   // custom <class SqlFloat>
   // end <class SqlFloat>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -207,12 +241,16 @@ class SqlFloat extends Object with TypeExtensionMixin {
     _scale = jsonMap["scale"];
     _unsigned = jsonMap["unsigned"];
   }
+
   int _precision;
   int _scale;
   bool _unsigned;
+
 }
 
+
 class SqlDate extends Object with TypeExtensionMixin {
+
   // custom <class SqlDate>
 
   Map toJson() => { };
@@ -220,16 +258,21 @@ class SqlDate extends Object with TypeExtensionMixin {
   static SqlDate fromJson(Object json) => new SqlDate();
 
   // end <class SqlDate>
+
 }
 
+
 class SqlTime extends Object with TypeExtensionMixin {
+
   SqlTime(this._hasTimezone);
 
   SqlTime._default();
 
   bool get hasTimezone => _hasTimezone;
+
   // custom <class SqlTime>
   // end <class SqlTime>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -251,18 +294,24 @@ class SqlTime extends Object with TypeExtensionMixin {
   void _fromJsonMapImpl(Map jsonMap) {
     _hasTimezone = jsonMap["hasTimezone"];
   }
+
   bool _hasTimezone;
+
 }
 
+
 class SqlTimestamp extends Object with TypeExtensionMixin {
+
   SqlTimestamp(this._hasTimezone, this._autoUpdate);
 
   SqlTimestamp._default();
 
   bool get hasTimezone => _hasTimezone;
   bool get autoUpdate => _autoUpdate;
+
   // custom <class SqlTimestamp>
   // end <class SqlTimestamp>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -286,15 +335,19 @@ class SqlTimestamp extends Object with TypeExtensionMixin {
     _hasTimezone = jsonMap["hasTimezone"];
     _autoUpdate = jsonMap["autoUpdate"];
   }
+
   bool _hasTimezone;
   bool _autoUpdate;
+
 }
+
 
 /// Different engines may have different support/naming conventions for
 /// the DDL corresponding to a given type. This provides an interface for
 /// a specific dialect to generate proper DDL for the supported type.
 ///
 abstract class SqlTypeVisitor {
+
   // custom <class SqlTypeVisitor>
 
   String ddl(SqlType sqlType) {
@@ -320,6 +373,8 @@ abstract class SqlTypeVisitor {
   String sqlExtensionDdl(SqlType);
 
   // end <class SqlTypeVisitor>
+
 }
+
 // custom <part sql_type>
 // end <part sql_type>

@@ -2,12 +2,15 @@ part of magus.mysql;
 
 /// Spec class for a UniqueKey - indicating the relationship by naming the columns in the unique constraint
 class UniqueKeySpec {
+
   const UniqueKeySpec(this.name, this.columns);
 
   final String name;
   final List<String> columns;
+
   // custom <class UniqueKeySpec>
   // end <class UniqueKeySpec>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -39,13 +42,17 @@ class UniqueKeySpec {
 
 }
 
+
 /// Spec class for a PrimaryKey - indicating the key columns with string names
 class PrimaryKeySpec {
+
   const PrimaryKeySpec(this.columns);
 
   final List<String> columns;
+
   // custom <class PrimaryKeySpec>
   // end <class PrimaryKeySpec>
+
 
   toString() => '(${runtimeType}) => ${ebisu.prettyJsonMap(toJson())}';
 
@@ -74,7 +81,9 @@ class PrimaryKeySpec {
 
 }
 
+
 class MysqlSchemaParser {
+
   // custom <class MysqlSchemaParser>
 
   /// Given a single Mysql DDL Table Create statement, return the metadata
@@ -285,9 +294,12 @@ $create
 
 
   // end <class MysqlSchemaParser>
+
 }
 
+
 class MysqlSchemaReader extends SchemaReader {
+
   // custom <class MysqlSchemaReader>
 
   MysqlSchemaReader(Engine engine, this._connectionPool) : super(engine);
@@ -318,7 +330,10 @@ class MysqlSchemaReader extends SchemaReader {
   }
 
   // end <class MysqlSchemaReader>
+
   final ConnectionPool _connectionPool;
+
 }
+
 // custom <part schema_reader>
 // end <part schema_reader>
