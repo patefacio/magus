@@ -2,6 +2,8 @@
 
 Package for reading database schema
 
+[![Build Status](https://drone.io/github.com/patefacio/magus/status.png)](https://drone.io/github.com/patefacio/magus/latest)
+
 # Purpose
 
 The goal is to be able to read a database schema and store a Dartish

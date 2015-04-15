@@ -16,6 +16,7 @@ final _logger = new Logger('schema_reading');
 
 // custom <library schema_reading>
 // end <library schema_reading>
+
 main([List<String> args]) {
   Logger.root.onRecord.listen((LogRecord r) =>
       print("${r.loggerName} [${r.level}]:\t${r.message}"));
@@ -42,5 +43,6 @@ ${table.foreignKeys}
   });
 
 // end <main>
+
 
 }

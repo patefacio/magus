@@ -82,6 +82,7 @@ CREATE TABLE `multi_fkey` (
 ''';
 
 // end <library test_mysql_table_parse>
+
 main([List<String> args]) {
   Logger.root.onRecord.listen((LogRecord r) =>
       print("${r.loggerName} [${r.level}]:\t${r.message}"));
@@ -153,5 +154,6 @@ CREATE TABLE `user_prefs` (
 
 
 // end <main>
+
 
 }
