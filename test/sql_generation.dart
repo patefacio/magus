@@ -2,7 +2,7 @@ library magus.sql_generation;
 
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 // custom <additional imports>
 import 'package:magus/schema.dart';

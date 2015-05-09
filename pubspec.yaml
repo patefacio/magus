@@ -1,5 +1,5 @@
 name: magus
-version: 0.0.10
+version: 0.0.11
 author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/magus
 description: >
@@ -16,12 +16,12 @@ dependencies:
 
 dev_dependencies:
   yaml: "any"
-  unittest: ">=0.11.0 < 0.12.0"
   browser: "any"
   hop: "any"
   hop_docgen: "any"
 
 # custom <magus dev dependencies>
+  test: "^0.12.0"
 
 environment:
   sdk: ">=1.8.0 <2.0.0"
