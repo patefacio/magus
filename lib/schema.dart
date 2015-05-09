@@ -6,13 +6,14 @@ import 'dart:convert' as convert;
 import 'dart:mirrors';
 import 'package:ebisu/ebisu.dart' as ebisu;
 import 'package:quiver/iterables.dart';
+
 // custom <additional imports>
 // end <additional imports>
 
-part 'src/schema/sql_type.dart';
-part 'src/schema/engine.dart';
 part 'src/schema/dialect.dart';
+part 'src/schema/engine.dart';
 part 'src/schema/query.dart';
+part 'src/schema/sql_type.dart';
 
 /// Establishes an interface to write schema to a specific Engine
 /// derivative.
@@ -113,7 +114,6 @@ class FkeyPathEntry {
 
 /// A named database schema with the corresponding table metadata
 /// associated with a specific engine.
-///
 class Schema {
 
   Schema(this._engine, this._name, this._tables) {
@@ -286,7 +286,6 @@ class Schema {
 
 /// Spec class for a ForeignKey - indicating the relationship by naming
 /// the tables and columns
-///
 class ForeignKeySpec {
 
   const ForeignKeySpec(this.name, this.refTable, this.columns, this.refColumns);
@@ -350,9 +349,7 @@ class ForeignKey {
   String get name => _name;
   /// Columns present in the foreign key
   List<Column> get columns => _columns;
-  /// 
   Table get refTable => _refTable;
-  /// 
   List<Column> get refColumns => _refColumns;
 
   // custom <class ForeignKey>
@@ -641,8 +638,8 @@ class Column {
 
 }
 
-
 // custom <library schema>
 
 // end <library schema>
+
 

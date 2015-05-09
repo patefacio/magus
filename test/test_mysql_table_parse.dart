@@ -1,8 +1,9 @@
-library magus.test.test_mysql_table_parse;
+library magus.test_mysql_table_parse;
 
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
+
 // custom <additional imports>
 
 import 'package:sqljocky/sqljocky.dart';
@@ -157,3 +158,5 @@ CREATE TABLE `user_prefs` (
 
 
 }
+
+

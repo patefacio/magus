@@ -1,3 +1,5 @@
+/// Library of interfaces allowing decoupling of specific database implmentation
+/// from functional requirements
 part of magus.schema;
 
 abstract class SchemaVisitor {
@@ -103,3 +105,4 @@ ${_filter(query)}
 
 // custom <part dialect>
 // end <part dialect>
+

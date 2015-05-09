@@ -337,3 +337,4 @@ class MysqlSchemaReader extends SchemaReader {
 
 // custom <part schema_reader>
 // end <part schema_reader>
+

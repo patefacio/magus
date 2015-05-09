@@ -8,7 +8,7 @@ String _topDir;
 void main() {
   Logger.root.onRecord.listen((LogRecord r) =>
       print("${r.loggerName} [${r.level}]:\t${r.message}"));
-  String here = path.absolute(Platform.script.path);
+  String here = path.absolute(Platform.script.toFilePath());
   _topDir = path.dirname(path.dirname(here));
   bool hasJsonToString = true;
   final descr = 'Package for reading schema and making metadata available';
@@ -16,7 +16,7 @@ void main() {
     ..doc = descr
     ..pubSpec.doc = descr
     ..pubSpec.homepage = 'https://github.com/patefacio/magus'
-    ..pubSpec.version = '0.0.9'
+    ..pubSpec.version = '0.0.10'
     ..license = 'boost'
     ..includesHop = true
     ..rootPath = '$_topDir'

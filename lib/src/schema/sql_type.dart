@@ -345,7 +345,6 @@ class SqlTimestamp extends Object with TypeExtensionMixin {
 /// Different engines may have different support/naming conventions for
 /// the DDL corresponding to a given type. This provides an interface for
 /// a specific dialect to generate proper DDL for the supported type.
-///
 abstract class SqlTypeVisitor {
 
   // custom <class SqlTypeVisitor>
@@ -378,3 +377,4 @@ abstract class SqlTypeVisitor {
 
 // custom <part sql_type>
 // end <part sql_type>
+

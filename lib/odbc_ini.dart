@@ -1,11 +1,11 @@
 /// Support for parsing odbc ini files to retrieve DSN
-///
 library magus.odbc_ini;
 
 import 'dart:io';
 import 'package:ini/ini.dart';
 import 'package:path/path.dart' as path;
 import 'package:sqljocky/sqljocky.dart';
+
 // custom <additional imports>
 // end <additional imports>
 
@@ -101,7 +101,7 @@ class OdbcIniEntry {
 
 }
 
-
 // custom <library odbc_ini>
 // end <library odbc_ini>
+
 

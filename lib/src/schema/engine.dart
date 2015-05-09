@@ -4,7 +4,6 @@ part of magus.schema;
 ///
 /// It provides access to dialect specific visitors that can generate
 /// appropriate [Table], [Expr], [Query] and [Schema]
-///
 abstract class Engine {
 
   // custom <class Engine>
@@ -33,3 +32,4 @@ abstract class Engine {
 
 // custom <part engine>
 // end <part engine>
+

@@ -1,8 +1,9 @@
-library magus.test.schema_reading;
+library magus.schema_reading;
 
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
+
 // custom <additional imports>
 
 import 'package:magus/schema.dart';
@@ -46,3 +47,5 @@ ${table.foreignKeys}
 
 
 }
+
+

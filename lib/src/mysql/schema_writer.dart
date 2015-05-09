@@ -15,3 +15,4 @@ class MysqlSchemaWriter extends SchemaWriter {
 
 // custom <part schema_writer>
 // end <part schema_writer>
+

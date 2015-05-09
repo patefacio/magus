@@ -1,3 +1,4 @@
+/// Metadata required for a database query
 part of magus.schema;
 
 class JoinType implements Comparable<JoinType> {
@@ -68,13 +69,10 @@ const JoinType RIGHT = JoinType.RIGHT;
 ///
 const JoinType FULL = JoinType.FULL;
 
-
 /// SQL Expression
 ///
 /// The reqult of a query is essentially a collection of expressions comprising the
 /// return fields. This provides such an interface.
-///
-///
 abstract class Expr {
 
   Expr([ this.alias ]);
@@ -523,7 +521,6 @@ class Join {
 /// specified. Joins can be imputed for normal foreign key relationships by
 /// traversing all fkey relationships on the tables referenced by the query. Joins
 /// are imputed with equality expressions linking the two tables.
-///
 class Query {
 
   final List<Expr> returns;
@@ -636,3 +633,4 @@ _orderItems(Iterable ordering, Set subset) =>
 
 
 // end <part query>
+
