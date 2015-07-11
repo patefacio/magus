@@ -1,6 +1,5 @@
 library magus.schema_reading;
 
-import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
