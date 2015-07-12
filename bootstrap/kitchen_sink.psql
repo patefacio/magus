@@ -1,0 +1,52 @@
+\pset pager off
+\l
+
+select version();
+
+drop table if exists all_types;
+
+create table all_types (
+       integer integer constraint firstkey primary key,
+       bit bit,
+       bit_5 bit(5),
+       boolean boolean,
+       char char,
+       char_16 char(16),
+       varchar_16 varchar(16),
+       text text,
+       varbit varbit,
+       box box,
+       bytea bytea,
+       cidr cidr,
+       circle circle,
+       date date,
+       double_precision double precision,
+       inet inet,
+       interval interval,
+       json json,
+/*    jsonb jsonb, 9.4 */
+       line line,
+       lseg lseg,
+       macaddr macaddr,
+       money money,
+       numeric numeric,
+       decimal decimal,
+       path path,
+       point point,
+       polygon polygon,
+       real real,
+       smallint smallint,
+       smallserial smallserial,
+       serial serial,
+       time time,
+       timestamp timestamp,
+       tsquery tsquery,
+       tsvector tsvector,
+       uuid uuid,
+       xml xml
+);
+
+\dt
+
+\d+ all_types
+
