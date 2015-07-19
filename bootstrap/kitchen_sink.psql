@@ -50,3 +50,9 @@ create table all_types (
 
 \d+ all_types
 
+
+SELECT nspname
+FROM pg_namespace
+ORDER BY nspname;
+
+select relname, n.nspname from pg_class c, pg_namespace n where c.relkind = 'r' and n.oid = c.relnamespace; /* and 'public' = n.nspname;*/

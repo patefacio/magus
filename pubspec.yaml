@@ -1,5 +1,5 @@
 name: magus
-version: 0.0.13
+version: 0.0.14
 author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/magus
 description: >
@@ -9,8 +9,8 @@ dependencies:
 # custom <magus dependencies>
 
   ini: ">=1.0.0<2.0.0"
-  sqljocky: ">=0.11.0<0.12.0"
-  ebisu: "^0.6.0"
+  sqljocky: "^0.11.0"
+  ebisu: "^0.6.3"
 
 # end <magus dependencies>
 
