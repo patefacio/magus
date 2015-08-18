@@ -21,8 +21,8 @@ def main():
         print(err)
         sys.exit()
 
-    engine = create_engine('mysql://%s:%s@localhost'%(args.user, args.password),
-                           echo="debug")
+    connectionString = 'mysql://%s:%s@localhost'%(args.user, args.password)
+    engine = create_engine(connectionString, echo="debug")
 
     engine.execute("DROP DATABASE IF EXISTS magus")    
     engine.execute("CREATE DATABASE magus")
