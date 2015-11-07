@@ -24,7 +24,7 @@ create table all_types (
        inet inet,
        interval interval,
        json json,
-/*    jsonb jsonb, 9.4 */
+       jsonb jsonb,
        line line,
        lseg lseg,
        macaddr macaddr,
@@ -43,7 +43,7 @@ create table all_types (
        tsquery tsquery,
        tsvector tsvector,
        uuid uuid,
-       xml xml
+       xml_member xml
 );
 
 \dt
