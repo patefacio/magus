@@ -4,7 +4,6 @@ library magus.odbc_ini;
 import 'dart:io';
 import 'package:ini/ini.dart';
 import 'package:path/path.dart' as path;
-import 'package:sqljocky/sqljocky.dart';
 
 // custom <additional imports>
 // end <additional imports>

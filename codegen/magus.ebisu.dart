@@ -33,7 +33,6 @@ Support for parsing odbc ini files to retrieve DSN
 '''
       ..imports = [
         'dart:io',
-        'package:sqljocky/sqljocky.dart',
         'package:ini/ini.dart',
         "'package:path/path.dart' as path",
       ]
