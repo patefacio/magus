@@ -15,9 +15,7 @@ part 'src/mysql/engine.dart';
 part 'src/mysql/schema_reader.dart';
 part 'src/mysql/schema_writer.dart';
 
-final _logger = new Logger('mysql');
+final Logger _logger = new Logger('mysql');
 
 // custom <library mysql>
 // end <library mysql>
-
-

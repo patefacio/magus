@@ -1,36 +1,32 @@
 name: magus
 version: 0.0.15
-author: Daniel Davidson <dbdavidson@yahoo.com>
 homepage: https://github.com/patefacio/magus
 description: >
   Package for reading schema and making metadata available
+environment:
+  sdk: '>=1.8.2 <2.0.0'
+
 dependencies:
 
 # custom <magus dependencies>
 
   ini: ">=1.0.0<2.0.0"
-  sqljocky: "^0.11.0"
-  ebisu: "^0.6.4"
+  ebisu: "^0.7.9"
+  sqljocky: "^0.14.1"
 
 # end <magus dependencies>
 
 dev_dependencies:
-  yaml: "any"
-  browser: "any"
-  hop: "any"
-  hop_docgen: "any"
 
 # custom <magus dev dependencies>
-  test: "^0.12.0"
-
-environment:
-  sdk: ">=1.8.0 <2.0.0"
+  test: "^0.12.23"
 
 # end <magus dev dependencies>
 
 dependency_overrides:
 # custom <magus dependency overrides>
 
+  crypto: ">=1.1.1 <3.0.0"
 #  ebisu:
 #    path: /home/dbdavidson/dev/open_source/ebisu
 

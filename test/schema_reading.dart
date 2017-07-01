@@ -12,15 +12,17 @@ import 'package:quiver/iterables.dart';
 
 // end <additional imports>
 
-final _logger = new Logger('schema_reading');
+final Logger _logger = new Logger('schema_reading');
 
 // custom <library schema_reading>
 // end <library schema_reading>
 
-main([List<String> args]) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
-  Logger.root.level = Level.OFF;
+void main([List<String> args]) {
+  if (args?.isEmpty ?? false) {
+    Logger.root.onRecord.listen(
+        (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+    Logger.root.level = Level.OFF;
+  }
 // custom <main>
 
   test('read_schema', () async {
@@ -35,16 +37,9 @@ ${table.foreignKeys}
 }''');
 
       print(new Col(table.columns.first));
-
     });
     //print('Schema is $schema');
-
-
   });
 
 // end <main>
-
-
 }
-
-

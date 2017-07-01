@@ -2,17 +2,15 @@
 part of magus.schema;
 
 class JoinType implements Comparable<JoinType> {
-  static const INNER = const JoinType._(0);
-  static const LEFT = const JoinType._(1);
-  static const RIGHT = const JoinType._(2);
-  static const FULL = const JoinType._(3);
+  static const JoinType INNER = const JoinType._(0);
 
-  static get values => [
-    INNER,
-    LEFT,
-    RIGHT,
-    FULL
-  ];
+  static const JoinType LEFT = const JoinType._(1);
+
+  static const JoinType RIGHT = const JoinType._(2);
+
+  static const JoinType FULL = const JoinType._(3);
+
+  static get values => [INNER, LEFT, RIGHT, FULL];
 
   final int value;
 
@@ -25,32 +23,40 @@ class JoinType implements Comparable<JoinType> {
   int compareTo(JoinType other) => value.compareTo(other.value);
 
   String toString() {
-    switch(this) {
-      case INNER: return "inner";
-      case LEFT: return "left";
-      case RIGHT: return "right";
-      case FULL: return "full";
+    switch (this) {
+      case INNER:
+        return "inner";
+      case LEFT:
+        return "left";
+      case RIGHT:
+        return "right";
+      case FULL:
+        return "full";
     }
     return null;
   }
 
   static JoinType fromString(String s) {
-    if(s == null) return null;
-    switch(s) {
-      case "inner": return INNER;
-      case "left": return LEFT;
-      case "right": return RIGHT;
-      case "full": return FULL;
-      default: return null;
+    if (s == null) return null;
+    switch (s) {
+      case "inner":
+        return INNER;
+      case "left":
+        return LEFT;
+      case "right":
+        return RIGHT;
+      case "full":
+        return FULL;
+      default:
+        return null;
     }
   }
 
-  int toJson() => value;
+  toJson() => toString();
 
-  static JoinType fromJson(int v) {
-    return v==null? null : values[v];
+  static JoinType fromJson(dynamic v) {
+    return (v is String) ? fromString(v) : (v is int) ? values[v] : v;
   }
-
 }
 
 /// Convenient access to JoinType.INNER with *INNER* see [JoinType].
@@ -74,8 +80,7 @@ const JoinType FULL = JoinType.FULL;
 /// The reqult of a query is essentially a collection of expressions comprising the
 /// return fields. This provides such an interface.
 abstract class Expr {
-
-  Expr([ this.alias ]);
+  Expr([this.alias]);
 
   String alias;
 
@@ -83,8 +88,7 @@ abstract class Expr {
 
   toString() => 'Some Expr';
 
-  get aliased => alias != null?
-    '$this as $alias' : toString();
+  get aliased => alias != null ? '$this as $alias' : toString();
 
   /// It is important to be able to determine the set of columns in any query,
   /// so addColumns should add to [out] any columns represented by the
@@ -95,10 +99,8 @@ abstract class Expr {
 
 }
 
-
 /// A single database column expression
 class Col extends Expr {
-
   Column get column => _column;
 
   // custom <class Col>
@@ -113,51 +115,42 @@ class Col extends Expr {
   // end <class Col>
 
   final Column _column;
-
 }
-
 
 /// A literal expression, as in SQL integer, float, string
 class Literal extends Expr {
-
   dynamic get value => _value;
 
   // custom <class Literal>
 
   Literal(this._value, [String alias]) : super(alias);
 
-  toString() =>
-    _value is String? "'$_value'" : '$_value';
+  toString() => _value is String ? "'$_value'" : '$_value';
 
   addColumns(Set<Column> out) {}
 
   // end <class Literal>
 
   dynamic _value;
-
 }
-
 
 /// A predicate expression - i.e. an expression that returns true or false
 abstract class Pred extends Expr {
-
   // custom <class Pred>
-  Pred([ String alias ]) : super(alias);
+  Pred([String alias]) : super(alias);
   // end <class Pred>
 
 }
 
-
 /// A unary expression
 class UnaryExpr extends Expr {
-
   Expr expr;
 
   // custom <class UnaryExpr>
 
-  UnaryExpr(e, [String alias]) :
-    super(alias),
-    expr = makeExpr(e);
+  UnaryExpr(e, [String alias])
+      : super(alias),
+        expr = makeExpr(e);
 
   addColumns(Set<Column> out) => expr.addColumns(out);
 
@@ -165,18 +158,16 @@ class UnaryExpr extends Expr {
 
 }
 
-
 class BinaryExpr extends Expr {
-
   Expr a;
   Expr b;
 
   // custom <class BinaryExpr>
 
-  BinaryExpr(a, b, [ String alias ]) :
-    super(alias),
-    this.a = makeExpr(a),
-    this.b = makeExpr(b);
+  BinaryExpr(a, b, [String alias])
+      : super(alias),
+        this.a = makeExpr(a),
+        this.b = makeExpr(b);
 
   addColumns(Set<Column> out) {
     a.addColumns(out);
@@ -187,17 +178,15 @@ class BinaryExpr extends Expr {
 
 }
 
-
 /// Query unary predicate
 class UnaryPred extends Pred {
-
   Expr expr;
 
   // custom <class UnaryPred>
 
-  UnaryPred(e, [String alias]) :
-    super(alias),
-    expr = makeExpr(e);
+  UnaryPred(e, [String alias])
+      : super(alias),
+        expr = makeExpr(e);
 
   addColumns(Set<Column> out) => expr.addColumns(out);
 
@@ -205,18 +194,16 @@ class UnaryPred extends Pred {
 
 }
 
-
 class BinaryPred extends Pred {
-
   Expr a;
   Expr b;
 
   // custom <class BinaryPred>
 
-  BinaryPred(a, b, [ String alias ]) :
-    super(alias),
-    this.a = makeExpr(a),
-    this.b = makeExpr(b);
+  BinaryPred(a, b, [String alias])
+      : super(alias),
+        this.a = makeExpr(a),
+        this.b = makeExpr(b);
 
   addColumns(Set<Column> out) {
     a.addColumns(out);
@@ -227,31 +214,25 @@ class BinaryPred extends Pred {
 
 }
 
-
 class MultiPred extends Pred {
-
   List<Expr> exprs;
 
   // custom <class MultiPred>
 
-  MultiPred(exprs, [ String alias ]) :
-    super(alias),
-    this.exprs = makeExprs(exprs).toList();
+  MultiPred(exprs, [String alias])
+      : super(alias),
+        this.exprs = makeExprs(exprs).toList();
 
-  addColumns(Set<Column> out) =>
-    exprs.forEach((e) => e.addColumns(out));
+  addColumns(Set<Column> out) => exprs.forEach((e) => e.addColumns(out));
 
   // end <class MultiPred>
 
 }
 
-
 class IsNull extends UnaryPred {
-
   // custom <class IsNull>
 
-  IsNull(expr, [String alias]) :
-    super(makeExpr(expr), alias);
+  IsNull(expr, [String alias]) : super(makeExpr(expr), alias);
 
   toString() => '$expr IS NULL';
 
@@ -259,13 +240,10 @@ class IsNull extends UnaryPred {
 
 }
 
-
 class NotNull extends UnaryPred {
-
   // custom <class NotNull>
 
-  NotNull(expr, [String alias]) :
-    super(makeExpr(expr), alias);
+  NotNull(expr, [String alias]) : super(makeExpr(expr), alias);
 
   toString() => '$expr IS NOT NULL';
 
@@ -273,13 +251,10 @@ class NotNull extends UnaryPred {
 
 }
 
-
 class Not extends UnaryPred {
-
   // custom <class Not>
 
-  Not(expr, [String alias]) :
-    super(makeExpr(expr), alias);
+  Not(expr, [String alias]) : super(makeExpr(expr), alias);
 
   toString() => 'NOT $expr';
 
@@ -287,13 +262,10 @@ class Not extends UnaryPred {
 
 }
 
-
 class And extends BinaryPred {
-
   // custom <class And>
 
-  And(a, b, [String alias]) :
-    super(a, b, alias);
+  And(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a AND $b';
 
@@ -301,13 +273,10 @@ class And extends BinaryPred {
 
 }
 
-
 class Or extends BinaryPred {
-
   // custom <class Or>
 
-  Or(a, b, [String alias]) :
-    super(a, b, alias);
+  Or(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a OR $b';
 
@@ -315,13 +284,10 @@ class Or extends BinaryPred {
 
 }
 
-
 class MultiAnd extends MultiPred {
-
   // custom <class MultiAnd>
 
-  MultiAnd(exprs, [String alias]) :
-    super(makeExprs(exprs).toList(), alias);
+  MultiAnd(exprs, [String alias]) : super(makeExprs(exprs).toList(), alias);
 
   toString() => exprs.join(' AND \n');
 
@@ -329,13 +295,10 @@ class MultiAnd extends MultiPred {
 
 }
 
-
 class MultiOr extends MultiPred {
-
   // custom <class MultiOr>
 
-  MultiOr(exprs, [String alias]) :
-    super(makeExprs(exprs).toList(), alias);
+  MultiOr(exprs, [String alias]) : super(makeExprs(exprs).toList(), alias);
 
   toString() => exprs.join(' OR \n');
 
@@ -343,13 +306,10 @@ class MultiOr extends MultiPred {
 
 }
 
-
 class Eq extends BinaryPred {
-
   // custom <class Eq>
 
-  Eq(a, b, [String alias]) :
-    super(a, b, alias);
+  Eq(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a = $b';
 
@@ -357,13 +317,10 @@ class Eq extends BinaryPred {
 
 }
 
-
 class NotEq extends BinaryPred {
-
   // custom <class NotEq>
 
-  NotEq(a, b, [String alias]) :
-    super(a, b, alias);
+  NotEq(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a <> $b';
 
@@ -371,13 +328,10 @@ class NotEq extends BinaryPred {
 
 }
 
-
 class Like extends BinaryPred {
-
   // custom <class Like>
 
-  Like(a, b, [String alias]) :
-    super(a, b, alias);
+  Like(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a LIKE $b';
 
@@ -385,13 +339,10 @@ class Like extends BinaryPred {
 
 }
 
-
 class Gt extends BinaryPred {
-
   // custom <class Gt>
 
-  Gt(a, b, [String alias]) :
-    super(a, b, alias);
+  Gt(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a > $b';
 
@@ -399,13 +350,10 @@ class Gt extends BinaryPred {
 
 }
 
-
 class Lt extends BinaryPred {
-
   // custom <class Lt>
 
-  Lt(a, b, [String alias]) :
-    super(a, b, alias);
+  Lt(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a < $b';
 
@@ -413,13 +361,10 @@ class Lt extends BinaryPred {
 
 }
 
-
 class Ge extends BinaryPred {
-
   // custom <class Ge>
 
-  Ge(a, b, [String alias]) :
-    super(a, b, alias);
+  Ge(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a >= $b';
 
@@ -427,13 +372,10 @@ class Ge extends BinaryPred {
 
 }
 
-
 class Le extends BinaryPred {
-
   // custom <class Le>
 
-  Le(a, b, [String alias]) :
-    super(a, b, alias);
+  Le(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a <= $b';
 
@@ -441,13 +383,10 @@ class Le extends BinaryPred {
 
 }
 
-
 class Abs extends UnaryExpr {
-
   // custom <class Abs>
 
-  Abs(expr, [String alias]) :
-    super(makeExpr(expr), alias);
+  Abs(expr, [String alias]) : super(makeExpr(expr), alias);
 
   toString() => 'ABS($expr)';
 
@@ -455,13 +394,10 @@ class Abs extends UnaryExpr {
 
 }
 
-
 class Plus extends BinaryExpr {
-
   // custom <class Plus>
 
-  Plus(a, b, [String alias]) :
-    super(a, b, alias);
+  Plus(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a - $b';
 
@@ -469,13 +405,10 @@ class Plus extends BinaryExpr {
 
 }
 
-
 class Minus extends BinaryExpr {
-
   // custom <class Minus>
 
-  Minus(a, b, [String alias]) :
-    super(a, b, alias);
+  Minus(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a - $b';
 
@@ -483,13 +416,10 @@ class Minus extends BinaryExpr {
 
 }
 
-
 class Times extends BinaryExpr {
-
   // custom <class Times>
 
-  Times(a, b, [String alias]) :
-    super(a, b, alias);
+  Times(a, b, [String alias]) : super(a, b, alias);
 
   toString() => '$a * $b';
 
@@ -497,9 +427,7 @@ class Times extends BinaryExpr {
 
 }
 
-
 class Join {
-
   const Join(this.table, this.joinExpr, this.joinType);
 
   final Table table;
@@ -514,7 +442,6 @@ class Join {
 
 }
 
-
 /// Build a query by specifying returns, joins [optionally], and a filter
 /// (i.e. where clause). The query builder will find all tables referenced by the
 /// returns and filter expressions in order to collect all tables that need to be
@@ -522,62 +449,57 @@ class Join {
 /// traversing all fkey relationships on the tables referenced by the query. Joins
 /// are imputed with equality expressions linking the two tables.
 class Query {
-
   final List<Expr> returns;
   List<Join> get joins => _joins;
   final bool imputeJoins;
   final Pred filter;
   final bool distinct;
+
   /// Tables hit by the query - determined by all columns hit by [returns] and [joins]
   List<Table> get tables => _tables;
 
   // custom <class Query>
 
   Query._all(this.returns, this._joins, this.imputeJoins, this.filter,
-    this.distinct, this._tables);
+      this.distinct, this._tables);
 
   factory Query(List columnsOrExprs,
-      {
-        List<Join> joins : null,
-        bool imputeJoins : true,
-        Pred filter : null,
-        bool distinct : false
-      }) {
+      {List<Join> joins: null,
+      bool imputeJoins: true,
+      Pred filter: null,
+      bool distinct: false}) {
     final columns = new Set<Column>();
     final exprs = makeExprs(columnsOrExprs).toList();
     exprs.forEach((expr) => expr.addColumns(columns));
-    if(filter != null) {
+    if (filter != null) {
       filter.addColumns(columns);
     }
     final tables = new Set.from(columns.map((c) => c.table));
 
-    if(tables.isEmpty)
-      throw "Queries must resolve to at least one table";
+    if (tables.isEmpty) throw "Queries must resolve to at least one table";
 
-    if(imputeJoins) {
+    if (imputeJoins) {
       final ordered = tables.first.schema.tables;
       final imputedJoins = _imputeJoins(tables);
       // order the joins so tables being referred to come first
       // Note b <=> a, to reverse natural order of tables for this op
-      imputedJoins.sort((a,b) =>
-          ordered.indexOf(b.table).compareTo(
-            ordered.indexOf(a.table)));
+      imputedJoins.sort((a, b) =>
+          ordered.indexOf(b.table).compareTo(ordered.indexOf(a.table)));
 
-      joins = joins == null?
-        imputedJoins : (joins..addAll(imputedJoins));
+      joins = joins == null ? imputedJoins : (joins..addAll(imputedJoins));
     }
 
-    return new Query._all(exprs, joins, imputeJoins, filter,
-        distinct, tables.toList());
+    return new Query._all(
+        exprs, joins, imputeJoins, filter, distinct, tables.toList());
   }
 
   static List<Join> _imputeJoins(Set<Table> tables) {
     final joins = [];
-    for(var table in tables) {
+    for (var table in tables) {
       table.foreignKeys.forEach((String fkeyName, ForeignKey fkey) {
-        if(tables.contains(fkey.refTable)) {
+        if (tables.contains(fkey.refTable)) {
           int end = fkey.columns.length;
-          for(int i=0; i<end; i++) {
+          for (int i = 0; i < end; i++) {
             final c1 = fkey.columns[i];
             final c2 = fkey.refColumns[i];
             joins.add(join(fkey.refTable, eq(c1, c2)));
@@ -592,22 +514,21 @@ class Query {
 
   final List<Join> _joins;
   final List<Table> _tables;
-
 }
 
 // custom <part query>
 
-makeExpr(dynamic e) =>
-  e is Expr? e :
-  e is Column? new Col(e) :
-  (e is num || e is String)? new Literal(e) :
-  throw '${e.runtimeType} is not convertible to Expr';
+makeExpr(dynamic e) => e is Expr
+    ? e
+    : e is Column
+        ? new Col(e)
+        : (e is num || e is String)
+            ? new Literal(e)
+            : throw '${e.runtimeType} is not convertible to Expr';
 
-makeExprs(Iterable<dynamic> exprs) =>
-  exprs.map((dynamic e) => makeExpr(e));
+makeExprs(Iterable<dynamic> exprs) => exprs.map((dynamic e) => makeExpr(e));
 
-query(Iterable<dynamic> exprs) =>
-  new Query(makeExprs(exprs).toList());
+query(Iterable<dynamic> exprs) => new Query(makeExprs(exprs).toList());
 
 col(Column e, [alias]) => new Col(e, alias);
 and(a, b, [alias]) => new And(a, b, alias);
@@ -625,12 +546,10 @@ plus(a, b, [alias]) => new Plus(a, b, alias);
 minus(a, b, [alias]) => new Minus(a, b, alias);
 times(a, b, [alias]) => new Times(a, b, alias);
 
-join(Table table, Expr joinExpr, [ JoinType joinType = INNER ]) =>
-  new Join(table, joinExpr, joinType);
+join(Table table, Expr joinExpr, [JoinType joinType = INNER]) =>
+    new Join(table, joinExpr, joinType);
 
 _orderItems(Iterable ordering, Set subset) =>
-  ordering.where((e) => subset.contains(e));
-
+    ordering.where((e) => subset.contains(e));
 
 // end <part query>
-

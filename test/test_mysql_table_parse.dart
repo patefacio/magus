@@ -12,7 +12,7 @@ import 'package:quiver/iterables.dart';
 
 // end <additional imports>
 
-final _logger = new Logger('test_mysql_table_parse');
+final Logger _logger = new Logger('test_mysql_table_parse');
 
 // custom <library test_mysql_table_parse>
 
@@ -83,10 +83,12 @@ CREATE TABLE `multi_fkey` (
 
 // end <library test_mysql_table_parse>
 
-main([List<String> args]) {
-  Logger.root.onRecord.listen((LogRecord r) =>
-      print("${r.loggerName} [${r.level}]:\t${r.message}"));
-  Logger.root.level = Level.OFF;
+void main([List<String> args]) {
+  if (args?.isEmpty ?? false) {
+    Logger.root.onRecord.listen(
+        (LogRecord r) => print("${r.loggerName} [${r.level}]:\t${r.message}"));
+    Logger.root.level = Level.OFF;
+  }
 // custom <main>
 
   group('table creates', () {
@@ -148,14 +150,7 @@ CREATE TABLE `user_prefs` (
       expect(fkeySpec.refColumns, ['user_id']);
       expect(fkeySpec.refTable, 'user');
     });
-
-
   });
 
-
 // end <main>
-
-
 }
-
-
