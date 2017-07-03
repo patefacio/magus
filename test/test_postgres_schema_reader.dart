@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 import 'package:postgres/postgres.dart';
 import 'package:magus/postgres/schema_reader.dart';
 import 'package:magus/postgres/engine.dart';
+import 'package:magus/odbc_ini.dart';
 
 // end <additional imports>
 
@@ -24,17 +25,27 @@ void main([List<String> args]) {
   }
 // custom <main>
 
-  test('read schema', () async {
-    var connection = new PostgreSQLConnection("localhost", 5432, "plusauri",
-        username: "postgres", password: "fkb92");
-    await connection.open();
+  PostgreSQLConnection connection;
 
+  setUp(() async {
+    print('setting up');
+    final ini = new OdbcIni().getEntry('plusauri');
+    print('ini got $ini');
+    connection = new PostgreSQLConnection("localhost", 5432, 'plusauri',
+        username: ini.user, password: ini.password);
+    await connection.open();
+  });
+
+  tearDown(() async {
+    print('tearing down');
+    await connection.close();
+    connection = null;
+  });
+
+  test('read schema', () async {
     final engine = new PostgresEngine(connection);
     final schemaReader = engine.createSchemaReader();
     await schemaReader.readSchema('bam');
-
-    await connection.close();
-    expect(2, 1 + 1);
   });
 
 // end <main>
