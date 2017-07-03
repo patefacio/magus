@@ -13,6 +13,8 @@ dependencies:
   ini: ">=1.0.0<2.0.0"
   ebisu: "^0.7.9"
   sqljocky: "^0.14.1"
+  postgres: "^0.9.5"
+  
 
 # end <magus dependencies>
 

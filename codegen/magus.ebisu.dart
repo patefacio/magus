@@ -25,6 +25,7 @@ void main() {
       library('schema_reading'),
       library('sql_generation'),
       library('test_mysql_table_parse'),
+      library('test_postgres_schema_reader'),
     ]
     ..libraries = [
       library('odbc_ini')
@@ -56,6 +57,21 @@ Support for parsing odbc ini files to retrieve DSN
               member('database')..ctors = [''],
             ]
         ],
+
+      library('schema_reader')
+      ..path = '$_topDir/lib/postgres'
+      ..imports = [
+        'package:magus/schema.dart',
+        'package:postgres/postgres.dart',
+      ]
+      ..classes = [
+        class_('postgres_schema_reader')
+        ..extend = 'SchemaReader'
+        ..members = [
+          member('connection')..type = 'PostgreSQLConnection'..access = RO,
+        ]
+      ],
+      
       library('schema')
         ..imports = [
           'package:quiver/iterables.dart',
