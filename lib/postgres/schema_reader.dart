@@ -1,9 +1,24 @@
 library magus.postgres.schema_reader;
 
+import 'package:magus/postgres/engine.dart';
 import 'package:magus/schema.dart';
 import 'package:postgres/postgres.dart';
 
 // custom <additional imports>
+
+class SchemaRow {
+  List _row;
+  SchemaRow(this._row);
+  get schema => _row[1];
+  get table => _row[2];
+  get column => _row[4];
+  get columnType => _row[5];
+  get maxLength => _row[6];
+
+  bool sameTable(SchemaRow other) =>
+      schema == other.schema && table == other.table;
+}
+
 // end <additional imports>
 
 class PostgresSchemaReader extends SchemaReader {
@@ -11,10 +26,12 @@ class PostgresSchemaReader extends SchemaReader {
 
   // custom <class PostgresSchemaReader>
 
-  PostgresSchemaReader(this._connection);
+  PostgresSchemaReader(PostgresEngine engine)
+      : super(engine),
+        _connection = engine.connection;
 
   @override
-  readSchema(
+  readSchema(String schemaName,
       {List skipTables = const [],
       List skipSchemas = const ['pg_catalog', 'information_schema']}) async {
     var query = '''
@@ -58,23 +75,32 @@ ORDER BY
     print(query);
 
     final filtered = (await connection.query(query));
+    final tables = {};
+    var table;
 
-    print(filtered.first);
+    newTable(row) => tables['${row.schema}.${row.table}'] = table = [ row ];
 
-    schema(row) => row[1];
-    table(row) => row[2];
-    column(row) => row[4];
-    columnType(row) => row[5];
-    maxLength(row) => row[6];
+    filtered.fold(null, (SchemaRow prev, elm) {
+      final row = new SchemaRow(elm);
+      if (prev == null || !row.sameTable(prev)) {
+        newTable(row);
+      } else {
+        table.add(row);
+      }
 
-    processTable(Iterable it) {
-      it.takeWhile((row) => row[1]);
-    }
+      return row;
+    });
 
-    for (List row in filtered) {
-      print(
-          '${schema(row)}.${table(row)}.${column(row)} * => ${columnType(row)} max(${maxLength(row)})');
-    }
+    //print('Final $tables');
+
+    tables.forEach((t, rows) {
+      print('$t\n\t${rows.map((c) => c.column).join("\n\t")}');
+    });
+
+    // for (List row in filtered) {
+    //   print(
+    //       '${schema(row)}.${table(row)}.${column(row)} * => ${columnType(row)} max(${maxLength(row)})');
+    // }
   }
 
   // end <class PostgresSchemaReader>

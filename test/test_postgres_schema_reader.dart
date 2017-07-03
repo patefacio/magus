@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'package:postgres/postgres.dart';
 import 'package:magus/postgres/schema_reader.dart';
+import 'package:magus/postgres/engine.dart';
 
 // end <additional imports>
 
@@ -28,8 +29,9 @@ void main([List<String> args]) {
         username: "postgres", password: "fkb92");
     await connection.open();
 
-    final schemaReader = new SchemaReader(connection);
-    await schemaReader.readSchema();
+    final engine = new PostgresEngine(connection);
+    final schemaReader = engine.createSchemaReader();
+    await schemaReader.readSchema('bam');
 
     await connection.close();
     expect(2, 1 + 1);

@@ -57,21 +57,45 @@ Support for parsing odbc ini files to retrieve DSN
               member('database')..ctors = [''],
             ]
         ],
-
+      library('engine')
+        ..path = '$_topDir/lib/postgres'
+        ..importAndExport('package:magus/postgres/schema_reader.dart')
+        ..imports.addAll([
+          'package:magus/schema.dart',
+          'package:postgres/postgres.dart',
+        ])
+        ..classes = [
+          class_('postgres_engine')
+            ..implement = ['Engine']
+            ..members = [
+              member('connection')
+                ..type = 'PostgreSQLConnection'
+                ..access = RO
+                ..isFinal = true,
+              member('visitor')
+                ..type = 'PostgresVisitor'
+                ..access = IA
+                ..isFinal = true
+                ..ctorInit = 'new PostgresVisitor',
+            ],
+          class_('postgres_visitor')..extend = 'SqlVisitor',
+        ],
       library('schema_reader')
-      ..path = '$_topDir/lib/postgres'
-      ..imports = [
-        'package:magus/schema.dart',
-        'package:postgres/postgres.dart',
-      ]
-      ..classes = [
-        class_('postgres_schema_reader')
-        ..extend = 'SchemaReader'
-        ..members = [
-          member('connection')..type = 'PostgreSQLConnection'..access = RO,
+        ..path = '$_topDir/lib/postgres'
+        ..imports = [
+          'package:magus/schema.dart',
+          'package:postgres/postgres.dart',
+          'package:magus/postgres/engine.dart',
         ]
-      ],
-      
+        ..classes = [
+          class_('postgres_schema_reader')
+            ..extend = 'SchemaReader'
+            ..members = [
+              member('connection')
+                ..type = 'PostgreSQLConnection'
+                ..access = RO,
+            ]
+        ],
       library('schema')
         ..imports = [
           'package:quiver/iterables.dart',
