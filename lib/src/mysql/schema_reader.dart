@@ -319,7 +319,7 @@ class MysqlSchemaReader extends SchemaReader {
                 .then((var row) => tableCreates[tableName] = row[0][1])))
         .then((futures) => Future.wait(futures))
         .then((var _) {
-      _connectionPool.close();
+      _connectionPool.closeConnectionsNow();
       return tableCreates;
     });
   }

@@ -26,7 +26,7 @@ void main([List<String> args]) {
 // custom <main>
 
   test('read_schema', () async {
-    var cp = OdbcIni.createConnectionPool('code_metrics');
+    var cp = createConnectionPool('mysql-plusauri');
     var engine = new MysqlEngine(cp);
     var reader = engine.createSchemaReader();
     var schema = (await reader.readSchema('code_metrics'));

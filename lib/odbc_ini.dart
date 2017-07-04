@@ -49,14 +49,6 @@ class OdbcIni {
     return new OdbcIni._(entries);
   }
 
-  static ConnectionPool createConnectionPool(String dsn,
-      [String odbcIniFileName]) {
-    final ini = new OdbcIni(odbcIniFileName);
-    final entry = ini.getEntry(dsn);
-    return new ConnectionPool(
-        user: entry.user, password: entry.password, db: dsn);
-  }
-
   toString() => _entries.keys.map((String section) => '''
 [$section]
 ${_entries[section]}''').join('\n');
@@ -83,6 +75,9 @@ class OdbcIniEntry {
   String get database => _database;
 
   // custom <class OdbcIniEntry>
+
+  toString() => '(user:$_user, pwd:$_password, db:$_database)';
+  
   // end <class OdbcIniEntry>
 
   String _user;

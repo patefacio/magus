@@ -34,11 +34,22 @@ class MysqlVisitor extends SqlVisitor {
   String evalExpr(Expr expr) => throw "TODO";
   String recreateSchema(Schema schema) => throw "TODO";
 
-  _returns(Query query) => query.returns.map((e) => evalExpr(e));
-
   // end <class MysqlVisitor>
 
 }
 
 // custom <part engine>
+
+ConnectionPool createConnectionPool(String dsn, [String odbcIniFileName]) {
+  if (odbcIniFileName == null) {
+    odbcIniFileName = path.join(Platform.environment['HOME'], '.odbc.ini');
+  }
+
+  final ini = new OdbcIni(odbcIniFileName);
+  final entry = ini.getEntry(dsn);
+  print(entry);  
+  return new ConnectionPool(
+      user: entry.user, password: entry.password, db: entry.database);
+}
+
 // end <part engine>

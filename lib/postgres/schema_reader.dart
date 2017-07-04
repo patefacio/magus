@@ -78,7 +78,7 @@ ORDER BY
     final tables = {};
     var table;
 
-    newTable(row) => tables['${row.schema}.${row.table}'] = table = [ row ];
+    newTable(row) => tables['${row.schema}.${row.table}'] = table = [row];
 
     filtered.fold(null, (SchemaRow prev, elm) {
       final row = new SchemaRow(elm);

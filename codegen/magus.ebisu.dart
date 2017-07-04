@@ -572,6 +572,8 @@ the tables and columns
           "'package:sqljocky/sqljocky.dart' hide Query",
           'package:magus/odbc_ini.dart',
           'package:magus/schema.dart',
+          'dart:io',
+          '"package:path/path.dart" as path',
         ]
         ..parts = [
           part('engine')
