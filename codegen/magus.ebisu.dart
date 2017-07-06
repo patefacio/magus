@@ -14,6 +14,10 @@ void main() {
   bool hasJsonToString = true;
   final descr = 'Package for reading schema and making metadata available';
   useDartFormatter = true;
+  
+  mysqlTestLib(name) => library(name)..path = path.join(_topDir, 'test', 'mysql');
+  postgresTestLib(name) => library(name)..path = path.join(_topDir, 'test', 'postgres');
+
   System ebisu = system('magus')
     ..doc = descr
     ..pubSpec.doc = descr
@@ -22,10 +26,10 @@ void main() {
     ..license = 'boost'
     ..rootPath = '$_topDir'
     ..testLibraries = [
-      library('schema_reading'),
-      library('sql_generation'),
-      library('test_mysql_table_parse'),
-      library('test_postgres_schema_reader'),
+      postgresTestLib('test_postgres_schema_reader'),
+      mysqlTestLib('test_mysql_table_parse'),
+      mysqlTestLib('test_mysql_schema_reader'),
+      mysqlTestLib('test_mysql_sql_generation'),
     ]
     ..libraries = [
       library('odbc_ini')

@@ -1,4 +1,4 @@
-library magus.schema_reading;
+library magus.test.mysql.test_mysql_schema_reader;
 
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
@@ -12,10 +12,10 @@ import 'package:quiver/iterables.dart';
 
 // end <additional imports>
 
-final Logger _logger = new Logger('schema_reading');
+final Logger _logger = new Logger('test_mysql_schema_reader');
 
-// custom <library schema_reading>
-// end <library schema_reading>
+// custom <library test_mysql_schema_reader>
+// end <library test_mysql_schema_reader>
 
 void main([List<String> args]) {
   if (args?.isEmpty ?? false) {
@@ -26,7 +26,7 @@ void main([List<String> args]) {
 // custom <main>
 
   test('read_schema', () async {
-    var cp = createConnectionPool('mysql-plusauri');
+    var cp = createConnectionPool('mysql-magus');
     var engine = new MysqlEngine(cp);
     var reader = engine.createSchemaReader();
     var schema = (await reader.readSchema('code_metrics'));

@@ -1,4 +1,4 @@
-library magus.test_mysql_table_parse;
+library magus.test.mysql.test_mysql_table_parse;
 
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';

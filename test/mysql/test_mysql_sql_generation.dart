@@ -1,4 +1,4 @@
-library magus.sql_generation;
+library magus.test.mysql.test_mysql_sql_generation;
 
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
@@ -9,10 +9,10 @@ import 'package:magus/odbc_ini.dart';
 import 'package:magus/mysql.dart';
 // end <additional imports>
 
-final Logger _logger = new Logger('sql_generation');
+final Logger _logger = new Logger('test_mysql_sql_generation');
 
-// custom <library sql_generation>
-// end <library sql_generation>
+// custom <library test_mysql_sql_generation>
+// end <library test_mysql_sql_generation>
 
 void main([List<String> args]) {
   if (args?.isEmpty ?? false) {
@@ -25,7 +25,7 @@ void main([List<String> args]) {
   var engine;
 
   readSchema() async {
-    var cp = OdbcIni.createConnectionPool('code_metrics');
+    var cp = createConnectionPool('mysql-magus');
     engine = new MysqlEngine(cp);
     var reader = engine.createSchemaReader();
     return await reader.readSchema('code_metrics');

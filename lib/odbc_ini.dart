@@ -77,7 +77,7 @@ class OdbcIniEntry {
   // custom <class OdbcIniEntry>
 
   toString() => '(user:$_user, pwd:$_password, db:$_database)';
-  
+
   // end <class OdbcIniEntry>
 
   String _user;

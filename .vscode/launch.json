@@ -1,7 +1,18 @@
 {
     "version": "0.2.0",
     "configurations": [
-    
+        {
+            "name": "pgrun",
+            "type": "dart-cli",
+            "request": "launch",
+            "program": "${workspaceRoot}/test/test_postgres_schema_reader.dart"
+        },
+    {
+        "name": "codegen",
+        "type": "dart-cli",
+        "request": "launch",
+        "program": "${workspaceRoot}/codegen/magus.ebisu.dart"
+    },
         {
             "name": "test",
             "type": "dart-cli",

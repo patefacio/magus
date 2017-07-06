@@ -167,6 +167,7 @@ class Schema {
     if (invocation.isGetter) {
       String tname = MirrorSystem.getName(invocation.memberName);
       if (tname.startsWith('_')) {
+        print('getting table ${tname} in ${_tableMap.keys}');
         final result = getTable(tname.substring(1));
         if (result != null) return result;
       }

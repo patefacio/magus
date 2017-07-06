@@ -29,11 +29,12 @@ void main([List<String> args]) {
 
   setUp(() async {
     print('setting up');
-    final ini = new OdbcIni().getEntry('plusauri');
-    print('ini got $ini');
+    final ini = new OdbcIni().getEntry('postgres-magus');
     connection = new PostgreSQLConnection("localhost", 5432, 'plusauri',
         username: ini.user, password: ini.password);
+    print('opening connection');
     await connection.open();
+    print('opened connection');    
   });
 
   tearDown(() async {
@@ -43,6 +44,7 @@ void main([List<String> args]) {
   });
 
   test('read schema', () async {
+    print('read schema');    
     final engine = new PostgresEngine(connection);
     final schemaReader = engine.createSchemaReader();
     await schemaReader.readSchema('bam');
