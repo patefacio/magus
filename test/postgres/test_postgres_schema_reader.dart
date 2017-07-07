@@ -1,15 +1,12 @@
-library magus.test_postgres_schema_reader;
+library magus.test.postgres.test_postgres_schema_reader;
 
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 // custom <additional imports>
-
 import 'package:postgres/postgres.dart';
-import 'package:magus/postgres/schema_reader.dart';
 import 'package:magus/postgres/engine.dart';
-import 'package:magus/odbc_ini.dart';
-
+import 'package:magus/Magus_ini.dart';
 // end <additional imports>
 
 final Logger _logger = new Logger('test_postgres_schema_reader');
@@ -24,17 +21,15 @@ void main([List<String> args]) {
     Logger.root.level = Level.OFF;
   }
 // custom <main>
-
   PostgreSQLConnection connection;
 
   setUp(() async {
     print('setting up');
-    final ini = new OdbcIni().getEntry('postgres-magus');
+    final ini = new MagusIni().getEntry('magus');
+    print('ini got $ini');
     connection = new PostgreSQLConnection("localhost", 5432, 'plusauri',
         username: ini.user, password: ini.password);
-    print('opening connection');
     await connection.open();
-    print('opened connection');    
   });
 
   tearDown(() async {
@@ -44,11 +39,9 @@ void main([List<String> args]) {
   });
 
   test('read schema', () async {
-    print('read schema');    
     final engine = new PostgresEngine(connection);
     final schemaReader = engine.createSchemaReader();
-    await schemaReader.readSchema('bam');
+    await schemaReader.readSchema('TODO: filter to schema');
   });
-
 // end <main>
 }

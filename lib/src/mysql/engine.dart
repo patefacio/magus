@@ -40,14 +40,14 @@ class MysqlVisitor extends SqlVisitor {
 
 // custom <part engine>
 
-ConnectionPool createConnectionPool(String dsn, [String odbcIniFileName]) {
-  if (odbcIniFileName == null) {
-    odbcIniFileName = path.join(Platform.environment['HOME'], '.odbc.ini');
+ConnectionPool createConnectionPool(String dsn, [String magusIniFileName]) {
+  if (magusIniFileName == null) {
+    magusIniFileName = path.join(Platform.environment['HOME'], '.magus.ini');
   }
 
-  final ini = new OdbcIni(odbcIniFileName);
+  final ini = new MagusIni(magusIniFileName);
   final entry = ini.getEntry(dsn);
-  print(entry);  
+  print(entry);
   return new ConnectionPool(
       user: entry.user, password: entry.password, db: entry.database);
 }

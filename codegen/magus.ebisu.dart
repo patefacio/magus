@@ -31,10 +31,28 @@ void main() {
       mysqlTestLib('test_mysql_schema_reader'),
       mysqlTestLib('test_mysql_sql_generation'),
     ]
+    ..scripts = [
+      script('run_sql')
+      ..isAsync = true
+      ..imports = [
+        'package:sqljocky/sqljocky.dart',
+        'package:postgres/postgres.dart',
+        'package:path/path.dart',
+      ]
+      ..args = [
+        scriptArg('file')
+        ..abbr = 'f'
+        ..isRequired = true,
+        scriptArg('ini_entry')
+        ..doc = 'ini entry for credentials'
+        ..abbr = 'i'
+        ..defaultsTo = 'magus',
+      ]
+    ]
     ..libraries = [
-      library('odbc_ini')
+      library('magus_ini')
         ..doc = '''
-Support for parsing odbc ini files to retrieve DSN
+Support for parsing magus ini files to retrieve DSN
 '''
         ..imports = [
           'dart:io',
@@ -42,23 +60,25 @@ Support for parsing odbc ini files to retrieve DSN
           "'package:path/path.dart' as path",
         ]
         ..classes = [
-          class_('odbc_ini')
+          class_('magus_ini')
             ..doc =
-                'Contains entries *of interest* per datasource parsed from an odbc ini file'
+                'Contains entries *of interest* per datasource parsed from an magus ini file'
             ..defaultMemberAccess = RO
             ..members = [
               member('entries')
-                ..type = 'Map<String, OdbcIniEntry>'
+                ..type = 'Map<String, MagusIniEntry>'
                 ..init = {}
             ],
-          class_('odbc_ini_entry')
+          class_('magus_ini_entry')
             ..doc =
-                'odbc.ini entries for a given DSN that are *of interest* enabling connection'
+                'magus.ini entries for a given DSN that are *of interest* enabling connection'
             ..defaultMemberAccess = RO
             ..members = [
               member('user')..ctors = [''],
               member('password')..ctors = [''],
               member('database')..ctors = [''],
+              member('hostname')..ctorsOpt = [''],                            
+              member('port')..ctorsOpt = [''],              
             ]
         ],
       library('engine')
@@ -574,7 +594,7 @@ the tables and columns
         ..imports = [
           'dart:async',
           "'package:sqljocky/sqljocky.dart' hide Query",
-          'package:magus/odbc_ini.dart',
+          'package:magus/magus_ini.dart',
           'package:magus/schema.dart',
           'dart:io',
           '"package:path/path.dart" as path',

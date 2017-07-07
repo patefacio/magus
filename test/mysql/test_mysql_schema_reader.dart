@@ -6,7 +6,6 @@ import 'package:test/test.dart';
 // custom <additional imports>
 
 import 'package:magus/schema.dart';
-import 'package:magus/odbc_ini.dart';
 import 'package:magus/mysql.dart';
 import 'package:quiver/iterables.dart';
 
